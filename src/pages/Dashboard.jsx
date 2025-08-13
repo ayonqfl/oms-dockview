@@ -1,28 +1,16 @@
+// default modules imports
 import { useState } from 'react'
-import CustomSidebar from '../components/common/CustomSidebar'
-import TradeView from '../layouts/TradeView'
 
+// custom styles imports
 import '../styles/dashboard.css'
 
 
 function Dashboard() {
-
   return (
     <div className="d-flex" style={{ minHeight: '100vh' }}>
-      <div>
-        <CustomSidebar />
-      </div>
-
-      <div className="d-flex flex-grow-1 dashboard-content">
-        <div className="container-fluid">
-          {/* <h1 className="text-center">
-            Hello, this is the dock view test dashboard!
-          </h1> */}
-          <TradeView />
-        </div>
-      </div>
+       <h1>This is OMS version two dashboard page!</h1>
     </div>
   )
 }
 
-export default Dashboard
+export default Dashboard;

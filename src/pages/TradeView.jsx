@@ -1,10 +1,13 @@
+// default modules imports
 import { DockviewReact } from 'dockview';
 import { useRef } from 'react';
 
-import Terminal from '../components/common/Terminal';
-import Editor from '../components/common/Editor';
-import Logs from '../components/common/Logs';
+// custom modules imports
+import Terminal from '../components/widgets/Terminal';
+import Editor from '../components/widgets/Editor';
+import Logs from '../components/widgets/Logs';
 
+// default styles imports
 import 'dockview/dist/styles/dockview.css';
 
 const TradeView = () => {

@@ -1,14 +1,16 @@
-import { useState } from 'react'
-import Dashboard from './pages/Dashboard'
+// default modules imports
+import { BrowserRouter as Router } from "react-router-dom";
+
+// custom modules imports
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
-  // const [count, setCount] = useState(0)
 
   return (
-    <>
-      <Dashboard />
-    </>
-  )
+    <Router>
+      <AppRoutes />
+    </Router>
+  );
 }
 
 export default App

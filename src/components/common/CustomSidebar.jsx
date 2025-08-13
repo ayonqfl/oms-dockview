@@ -1,13 +1,15 @@
+// default styles imports
 import "react-pro-sidebar/dist/css/styles.css";
 
+// custom modules imports
 import { useState } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faRightLeft } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faRightLeft, faHouse } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 
-// Removed Link from react-router-dom
 
-const Item = ({ title, icon, selected, setSelected }) => {
+const Item = ({ title,  to, icon, selected, setSelected }) => {
   return (
     <MenuItem
       active={selected === title}
@@ -15,8 +17,7 @@ const Item = ({ title, icon, selected, setSelected }) => {
       onClick={() => setSelected(title)}
       icon={<FontAwesomeIcon icon={icon} />}
     >
-      <span>{title}</span>
-      {/* Removed <Link to={to} /> */}
+      <Link to={to} style={{ color: "#fff", textDecoration: "none" }}>{title}</Link>
     </MenuItem>
   );
 };
@@ -26,12 +27,7 @@ const CustomSidebar = () => {
   const [selected, setSelected] = useState("Dashboard");
 
   return (
-    <div
-      style={{
-        backgroundColor: "rgb(245, 245, 245)",
-        height: "100vh",
-      }}
-    >
+    <div style={{backgroundColor: "rgb(245, 245, 245)", height: "100vh",}}>
       <ProSidebar collapsed={isCollapsed}>
         <Menu iconShape="square">
           <MenuItem
@@ -66,9 +62,20 @@ const CustomSidebar = () => {
 
           <div style={{ paddingLeft: isCollapsed ? undefined : "10%" }}>
             <Item
+              title="Dashboard"
+              to="/dashboard"
+              icon={faHouse}
+              // selected={selected}
+              setSelected={setSelected}
+            />
+          </div>
+
+          <div style={{ paddingLeft: isCollapsed ? undefined : "10%" }}>
+            <Item
               title="Trade"
+              to="/trade"
               icon={faRightLeft}
-              selected={selected}
+              // selected={selected}
               setSelected={setSelected}
             />
           </div>
