@@ -1,3 +1,23 @@
 .dashboard-content {
     background-color: transparent;
 }
+
+/* Rest of your existing dashboard.css */
+.dashboard-content {
+  background-color: var(--content-bg);
+  color: var(--text-color);
+}
+
+/* Update your sidebar styles to use variables */
+.sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+}
+
+.menu-item:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.menu-item.active {
+  background-color: var(--sidebar-active);
+}

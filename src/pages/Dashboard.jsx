@@ -1,9 +1,5 @@
-// default modules imports
-import { useState } from 'react'
-
 // custom styles imports
 import '../styles/dashboard.css'
-
 
 function Dashboard() {
   return (
