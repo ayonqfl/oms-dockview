@@ -1,8 +1,9 @@
 // default modules imports
 import { DockviewReact } from 'dockview';
 import { useRef } from 'react';
+import { useTheme } from '../utilities/context/ThemeContext';
 
-// custom modules imports
+//custom modules imports
 import Terminal from '../components/widgets/Terminal';
 import Editor from '../components/widgets/Editor';
 import Logs from '../components/widgets/Logs';
@@ -12,6 +13,9 @@ import 'dockview/dist/styles/dockview.css';
 
 const TradeView = () => {
     const dockviewRef = useRef(null);
+    const { theme } = useTheme();
+    
+    const dockviewTheme = theme === 'dark'? 'dockview-theme-abyss' : 'dockview-theme-light';
 
     const onReady = (event) => {
         dockviewRef.current = event.api;
@@ -39,14 +43,14 @@ const TradeView = () => {
     };
 
     return (
-        <div style={{height: "899px"}}>
+        <div style={{ height: "899px" }} data-theme={theme}>
             <button onClick={addLogsPanel} className='my-2'>
                 Add Logs Panel
             </button>
 
             <DockviewReact
                 onReady={onReady}
-                className="dockview-theme-abyss"
+                className={dockviewTheme} 
                 components={{
                     editor: () => <Editor />,
                     terminal: () => <Terminal />,

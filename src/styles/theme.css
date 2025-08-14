@@ -1,9 +1,9 @@
 :root {
-  --bg-color: #ffffff;
-  --text-color: #333333;
-  --primary-color: #6200ee;
+  --bg-color: #121212;
+  --text-color: #f5f5f5;
+  --primary-color: #bb86fc;
   --secondary-color: #03dac6;
-  --card-bg: #f5f5f5;
+  --card-bg: #1e1e1e;
 
   --sidebar-bg: #1a1a2e;
   --sidebar-text: #ffffff;
@@ -16,15 +16,20 @@
    --topbar-bg: #ffffff;
   --text-color: #333333;
   --border-color: #e0e0e0;
+
+   --dv-group-view-background-color: #f3f3f3;
+    --dv-activegroup-visiblepanel-tab-background-color: #e4e4e4;
+     --dv-tabs-and-actions-container-background-color: #f3f3f3;
+  --dv-tab-divider-color: #dddddd;
   
 }
 
 [data-theme="dark"] {
-  --bg-color: #121212;
-  --text-color: #f5f5f5;
-  --primary-color: #bb86fc;
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --primary-color: #6200ee;
   --secondary-color: #03dac6;
-  --card-bg: #1e1e1e;
+  --card-bg: #f5f5f5;
 
   --sidebar-bg: #1a1a2e;
   --sidebar-text: #ffffff;
@@ -37,4 +42,12 @@
   --topbar-bg: #1a1a2e;
   --text-color: #ffffff;
   --border-color: #2d2d42;
+
+
+  --dv-group-view-background-color: #1e1e1e;
+    --dv-activegroup-visiblepanel-tab-background-color: #252526;
+    --dv-tabs-and-actions-container-background-color: #1e1e1e;
+  --dv-tab-divider-color: #333333;
 }
+
+
