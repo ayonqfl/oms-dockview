@@ -8,9 +8,6 @@ import Terminal from '../components/widgets/Terminal';
 import Editor from '../components/widgets/Editor';
 import Logs from '../components/widgets/Logs';
 
-// default styles imports
-import 'dockview/dist/styles/dockview.css';
-
 const LAYOUT_STORAGE_KEY = 'tradeview_layout';
 
 const TradeView = () => {
@@ -32,7 +29,7 @@ const TradeView = () => {
 
      // Load layout on startup    const { theme } = useTheme();
     
-    const dockviewTheme = theme === 'dark'? 'dockview-theme-abyss' : 'dockview-theme-light';
+    const dockviewTheme = theme === 'dark'? 'dockview-theme-dark' : 'dockview-theme-light';
 
     const onReady = (event) => {
         dockviewRef.current = event.api;
@@ -77,7 +74,7 @@ const TradeView = () => {
     };
 
     return (
-        <div style={{ height: "899px" }} data-theme={theme}>
+        <div style={{ height: "899px", marginTop: "103px" , marginLeft: "60px"}} data-theme={theme}>
             <button onClick={addLogsPanel} className='my-2'>
                 Add Logs Panel
             </button>

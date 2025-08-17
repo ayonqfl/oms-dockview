@@ -1,13 +1,17 @@
 .sidebar-container {
   height: 100vh;
-  background-color: rgb(245, 245, 245);
+  width: 60px;     
+  background-color: #1a1a2e;
+  position: fixed; 
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  color: #ffffff;
 }
 
 .sidebar {
-  width: 60px;
   height: 100%;
-  background-color: #1a1a2e;
-  color: #ffffff;
+  width: 100%;         
 }
 
 .menu-items {
