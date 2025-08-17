@@ -1,0 +1,104 @@
+/* Thin Elegant Theme Switch */
+.theme-switch {
+  --switch-width: 52px;
+  --switch-height: 24px;
+  --thumb-size: 20px;
+  --thumb-offset: 2px;
+  --track-border: 1px;
+  
+  position: relative;
+  width: var(--switch-width);
+  height: var(--switch-height);
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.switch-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 100px;
+  background-color: #f0f0f0;
+  border: var(--track-border) solid #e0e0e0;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.theme-switch.dark .switch-track {
+  background-color: #505866;
+  border-color: #1a202c;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--thumb-offset);
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border-radius: 50%;
+  background: #0dcaf0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+
+.theme-switch.dark .switch-thumb {
+  transform: 
+    translateX(calc(var(--switch-width) - var(--thumb-size) - (2 * var(--thumb-offset))))
+    translateY(-50%);
+  background: #0dcaf0;
+}
+
+.switch-thumb svg {
+  width: 12px;
+  height: 12px;
+  transition: all 0.3s ease;
+}
+
+.theme-switch.light .switch-thumb svg {
+  color: #fff;
+  transform: rotate(0deg);
+}
+
+.theme-switch.dark .switch-thumb svg {
+  color: #fff;
+  transform: rotate(360deg);
+}
+
+/* Hover effects */
+.theme-switch:hover .switch-track {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.theme-switch:hover .switch-thumb {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.theme-switch.dark:hover .switch-thumb {
+  transform: 
+    translateX(calc(var(--switch-width) - var(--thumb-size) - (2 * var(--thumb-offset))))
+    translateY(-50%)
+    scale(1.1);
+}
+
+/* Active state */
+.theme-switch:active .switch-thumb {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.theme-switch.dark:active .switch-thumb {
+  transform: 
+    translateX(calc(var(--switch-width) - var(--thumb-size) - (2 * var(--thumb-offset))))
+    translateY(-50%)
+    scale(0.95);
+}

@@ -10,7 +10,7 @@
 
 /* Update your sidebar styles to use variables */
 .sidebar {
-    background-color: #212529;
+    background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
     border-right: 1px solid #474747;
 }
@@ -21,4 +21,303 @@
 
 .menu-item.active {
   background-color: var(--sidebar-active);
+}
+
+:root {
+  /* Light Mode Colors */
+  --bg-color: #f5f7fa;
+  --text-color: #333;
+  --text-secondary: #7f8c8d;
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --border-color: #ecf0f1;
+  --title-color: #2c3e50;
+  --subtitle-color: #7f8c8d;
+  --positive: #27ae60;
+  --negative: #e74c3c;
+  --neutral: #f39c12;
+
+  /* Card Specific Backgrounds */
+  --account-snapshot-bg: #f8f9fa;
+  --portfolio-health-bg: #f0f7ff;
+  --top-sectors-bg: #fff8f0;
+  --top-investors-bg: #f5f0ff;
+
+  /* Dark Mode Colors */
+  --dark-bg-color: #1a1a2e;
+  --dark-text-color: #e6e6e6;
+  --dark-text-secondary: #b8b8b8;
+  --dark-card-bg: #16213e;
+  --dark-card-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  --dark-border-color: #2a2a3a;
+  --dark-title-color: #ffffff;
+  --dark-subtitle-color: #b8b8b8;
+  --dark-positive: #2ecc71;
+  --dark-negative: #ff6b6b;
+  --dark-neutral: #feca57;
+
+  /* Dark Mode Card Specific Backgrounds */
+  --dark-account-snapshot-bg: #1e2a3a;
+  --dark-portfolio-health-bg: #1a2a42;
+  --dark-top-sectors-bg: #2a1e3a;
+  --dark-top-investors-bg: #1e1a42;
+}
+
+[data-theme="dark"] {
+  --bg-color: var(--dark-bg-color);
+  --text-color: var(--dark-text-color);
+  --text-secondary: var(--dark-text-secondary);
+  --card-bg: var(--dark-card-bg);
+  --card-shadow: var(--dark-card-shadow);
+  --border-color: var(--dark-border-color);
+  --title-color: var(--dark-title-color);
+  --subtitle-color: var(--dark-subtitle-color);
+  --positive: var(--dark-positive);
+  --negative: var(--dark-negative);
+  --neutral: var(--dark-neutral);
+
+  --account-snapshot-bg: var(--dark-account-snapshot-bg);
+  --portfolio-health-bg: var(--dark-portfolio-health-bg);
+  --top-sectors-bg: var(--dark-top-sectors-bg);
+  --top-investors-bg: var(--dark-top-investors-bg);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  padding: 30px;
+  margin-top: 80px;
+  margin-left: 60px;
+  color: var(--text-color);
+  font-family: 'Arial', sans-serif;
+  background-color: var(--bg-color);
+  min-height: calc(100vh - 80px);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dashboard-title {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  color: var(--title-color);
+}
+
+.dashboard-subtitle {
+  font-size: 1.1rem;
+  color: var(--subtitle-color);
+  margin-bottom: 30px;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+}
+
+/* Common Card Styles */
+.dashboard-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: var(--title-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+/* Account Snapshot Styles */
+.account-snapshot {
+  background-color: var(--account-snapshot-bg);
+}
+
+.metric {
+  margin-bottom: 15px;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.metric-value {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--text-color);
+}
+
+.metric-value.large {
+  font-size: 2rem;
+}
+
+.metric-value.positive {
+  color: var(--positive);
+}
+
+.metric-value.negative {
+  color: var(--negative);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+/* Portfolio Health Styles */
+.portfolio-health {
+  background-color: var(--portfolio-health-bg);
+}
+
+.health-indicators {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.health-indicator {
+  margin-bottom: 15px;
+}
+
+.indicator-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.indicator-value {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.health-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border-color);
+  overflow: hidden;
+}
+
+.health-bar::after {
+  content: '';
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.health-bar.excellent::after {
+  width: 95%;
+  background: var(--positive);
+}
+
+.health-bar.good::after {
+  width: 80%;
+  background: var(--positive);
+}
+
+.health-bar.moderate::after {
+  width: 65%;
+  background: var(--neutral);
+}
+
+.health-bar.poor::after {
+  width: 40%;
+  background: var(--negative);
+}
+
+/* List Styles (for Sectors and Investors) */
+.top-sectors {
+  background-color: var(--top-sectors-bg);
+}
+
+.top-investors {
+  background-color: var(--top-investors-bg);
+}
+
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 600;
+  flex: 1;
+  color: var(--text-color);
+}
+
+.item-details {
+  display: flex;
+  gap: 20px;
+}
+
+.item-allocation {
+  font-weight: 600;
+  width: 50px;
+  text-align: right;
+  color: var(--text-color);
+}
+
+.item-performance {
+  width: 60px;
+  text-align: right;
+}
+
+.item-performance.positive {
+  color: var(--positive);
+}
+
+.item-performance.negative {
+  color: var(--negative);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    margin-left: 20px;
+    padding: 15px;
+  }
+  
+  .health-indicators {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
 }

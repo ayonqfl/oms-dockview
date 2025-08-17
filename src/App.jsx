@@ -8,7 +8,7 @@ import AppRoutes from "./routes/AppRoutes";
 
 // custom styles imports
 import './styles/theme.css';
-import './styles/app.css';
+
 
 function App() {
  const { theme } = useTheme();

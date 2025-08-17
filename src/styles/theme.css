@@ -3,12 +3,12 @@
     --content-bg: #ffffff;
 
   /*=========== top bar styles============= */
-  --topbar-bg: #ffffff;
+  --oms-topbar-bg:#f6f6f8;
   
   /* ==========Side Bar styles============= */
-  --sidebar-bg: #1a1a2e;
+  --sidebar-bg: #f6f6f8;
   --sidebar-text: #ffffff;
-  --sidebar-active: rgba(255, 255, 255, 0.2);
+  --sidebar-active: #0dcaf0;
   --sidebar-hover: rgba(255, 255, 255, 0.1);
 
 }
@@ -18,15 +18,16 @@
    --content-bg: #1e1e1e;
 
   /*=========== top bar styles============= */
-  --topbar-bg: #303039;
+  --oms-topbar-bg:#212529;
 
   /* ==========Side Bar styles============= */
-  --sidebar-bg: #303039;
+  --sidebar-bg: #212529;
   --sidebar-text: #ffffff;
-  --sidebar-active: rgba(255, 255, 255, 0.2);
+  --sidebar-active: #0dcaf0;
   --sidebar-hover: rgba(255, 255, 255, 0.1);
 }
 
+/*================ Doc View Theme Styles ==================*/
 .dv-scrollable {
   position: relative;
   overflow: hidden;
@@ -741,7 +742,7 @@
   height: 100%;
 }
 
-/* For the theme switcher button */
+/* =================Theme switcher button Styles =====================*/
 .theme-switcher {
   --size: 2.5rem;
   width: var(--size);
@@ -770,13 +771,12 @@
   transition: all 0.3s ease;
 }
 
-/* Dark mode specific styles */
 .theme-switcher.dark {
   background: rgba(255, 255, 255, 0.1);
 }
 
 .theme-switcher.dark .theme-icon {
-  color: #FFD43B; /* Sunny yellow */
+  color: #FFD43B;
 }
 
 /* Light mode specific styles */
@@ -785,7 +785,7 @@
 }
 
 .theme-switcher:not(.dark) .theme-icon {
-  color: #495057; /* Dark gray */
+  color: #80a7cd; 
 }
 
 /* Optional: Add a subtle pulse animation on theme change */
@@ -799,6 +799,7 @@
   animation: pulse 0.4s ease;
 }
 
+/*================= Top bar Styles================= */
 .topbar { 
     height: 80px;
     display: flex;
@@ -806,7 +807,7 @@
     align-items: center;
     padding: 0 20px;
     border-bottom: 1px solid var(--border-color);
-    background-color: #212529;
+    background-color: var(--oms-topbar-bg);
     color: var(--text-color);
     position: fixed;
     top: 0;
