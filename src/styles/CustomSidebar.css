@@ -28,7 +28,7 @@
   align-items: center;
   justify-content: center;
   padding: 10px 0;
-  color: #ffffff;
+  color: var(--boby-text);
   text-decoration: none;
   position: relative;
   border-radius: 5px;
@@ -59,7 +59,7 @@
   opacity: 0;
   transition: opacity 0.3s;
   margin-left: 10px;
-  z-index: 100;
+  z-index: 999;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 

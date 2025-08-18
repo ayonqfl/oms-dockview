@@ -1,7 +1,3 @@
-.dashboard-content {
-    background-color: transparent;
-}
-
 /* Rest of your existing dashboard.css */
 .dashboard-content {
   background-color: var(--content-bg);
@@ -12,7 +8,7 @@
 .sidebar {
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
-    border-right: 1px solid #474747;
+    border-right: 1px solid var(--sidebar-brder);
 }
 
 .menu-item:hover {
@@ -25,7 +21,7 @@
 
 :root {
   /* Light Mode Colors */
-  --bg-color: #f5f7fa;
+  --bg-color: #ffffff;
   --text-color: #333;
   --text-secondary: #7f8c8d;
   --card-bg: #ffffff;
@@ -38,13 +34,13 @@
   --neutral: #f39c12;
 
   /* Card Specific Backgrounds */
-  --account-snapshot-bg: #f8f9fa;
-  --portfolio-health-bg: #f0f7ff;
-  --top-sectors-bg: #fff8f0;
-  --top-investors-bg: #f5f0ff;
+  --account-snapshot-bg: #ffffff;
+  --portfolio-health-bg: #ffffff;
+  --top-sectors-bg: #ffffff;
+  --top-investors-bg: #ffffff;
 
   /* Dark Mode Colors */
-  --dark-bg-color: #1a1a2e;
+  --dark-bg-color: #1e1e1e;
   --dark-text-color: #e6e6e6;
   --dark-text-secondary: #b8b8b8;
   --dark-card-bg: #16213e;
@@ -57,10 +53,10 @@
   --dark-neutral: #feca57;
 
   /* Dark Mode Card Specific Backgrounds */
-  --dark-account-snapshot-bg: #1e2a3a;
-  --dark-portfolio-health-bg: #1a2a42;
-  --dark-top-sectors-bg: #2a1e3a;
-  --dark-top-investors-bg: #1e1a42;
+  --dark-account-snapshot-bg: #232323;
+  --dark-portfolio-health-bg: #232323;
+  --dark-top-sectors-bg: #232323;
+  --dark-top-investors-bg: #232323;
 }
 
 [data-theme="dark"] {
@@ -90,8 +86,7 @@
   color: var(--text-color);
   font-family: 'Arial', sans-serif;
   background-color: var(--bg-color);
-  min-height: calc(100vh - 80px);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: calc(100vh - 80px); 
 }
 
 .dashboard-title {

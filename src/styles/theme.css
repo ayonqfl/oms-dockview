@@ -1,6 +1,7 @@
 :root {
   /* ==========Content styles============= */
     --content-bg: #ffffff;
+    --boby-text: #000000;
 
   /*=========== top bar styles============= */
   --oms-topbar-bg:#f6f6f8;
@@ -8,6 +9,7 @@
   /* ==========Side Bar styles============= */
   --sidebar-bg: #f6f6f8;
   --sidebar-text: #ffffff;
+  --sidebar-brder: #cdcdcd;
   --sidebar-active: #0dcaf0;
   --sidebar-hover: rgba(255, 255, 255, 0.1);
 
@@ -16,6 +18,7 @@
 [data-theme="dark"] {
    /* ==========Content styles============= */
    --content-bg: #1e1e1e;
+   --boby-text: #ffffff;
 
   /*=========== top bar styles============= */
   --oms-topbar-bg:#212529;
@@ -23,6 +26,7 @@
   /* ==========Side Bar styles============= */
   --sidebar-bg: #212529;
   --sidebar-text: #ffffff;
+  --sidebar-brder: #474747;
   --sidebar-active: #0dcaf0;
   --sidebar-hover: rgba(255, 255, 255, 0.1);
 }
@@ -813,11 +817,10 @@
     top: 0;
     left: 60px;
     right: 0;
-    z-index: 1000;
+    z-index:99;
 }
 
 .topbar-title {
     font-size: 1rem;
-    font-weight: bold;
-    color:  #fff;
+    font-weight: bold; 
 }

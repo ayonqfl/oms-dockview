@@ -3,7 +3,7 @@ const Topbar = () => {
   return (
     <nav className='topbar'>
       <div className="topbar-title">
-        <h1>OMS QFL</h1>
+        <h4>OMS QFL</h4>
       </div>
       <div className="topbar-content">
          <ThemeSwitcher />
