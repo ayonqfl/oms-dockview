@@ -1,21 +1,21 @@
-// default modules imports
 import { DockviewReact } from 'dockview';
 import { useRef, useState, useEffect } from 'react';
 import { useTheme } from '../utilities/context/ThemeContext';
+import { useOutletContext } from "react-router-dom";
 
-//custom modules imports
 import Terminal from '../components/widgets/Terminal';
-import Editor from '../components/widgets/Editor';
+import Watchlist from '../components/widgets/Watchlist';
 import Logs from '../components/widgets/Logs';
 
 const LAYOUT_STORAGE_KEY = 'tradeview_layout';
 
 const TradeView = () => {
+    const { addLogsTrigger } = useOutletContext(); // <-- get trigger from DashboardLayout
     const { theme } = useTheme();
     const dockviewRef = useRef(null);
     const [api, setApi] = useState(null);
 
-    // Save layout changes to localStorage
+    // Save layout changes
     useEffect(() => {
         if (!api) return;
 
@@ -27,8 +27,17 @@ const TradeView = () => {
         return () => disposable.dispose();
     }, [api]);
 
-     // Load layout on startup    const { theme } = useTheme();
-    
+    useEffect(() => {
+        if (!dockviewRef.current) return;
+
+        const id = `logs-${Date.now()}`;
+        dockviewRef.current.addPanel({
+        id,
+        component: 'logs',
+        title: `Logs (${id.slice(-4)})`,
+        });
+    }, [addLogsTrigger]); // Add logs panel whenever trigger changes
+
     const dockviewTheme = theme === 'dark'? 'dockview-theme-dark' : 'dockview-theme-light';
 
     const onReady = (event) => {
@@ -49,41 +58,18 @@ const TradeView = () => {
         }
 
         if (!success) {
-            // Load default layout if no saved state
-            event.api.addPanel({
-                id: 'editor',
-                component: 'editor',
-                title: 'Editor',
-            });
-
-            event.api.addPanel({
-                id: 'terminal',
-                component: 'terminal',
-                title: 'Terminal',
-            });
+            event.api.addPanel({ id: 'watchlist', component: 'watchlist', title: 'Watchlist' });
+            event.api.addPanel({ id: 'terminal', component: 'terminal', title: 'Terminal' });
         }
     };
 
-    const addLogsPanel = () => {
-        const id = `logs-${Date.now()}`;
-        dockviewRef.current.addPanel({
-            id,
-            component: 'logs',
-            title: `Logs (${id.slice(-4)})`,
-        });
-    };
-
     return (
-        <div style={{ height: "899px", marginTop: "103px" , marginLeft: "60px"}} data-theme={theme}>
-            <button onClick={addLogsPanel} className='my-2'>
-                Add Logs Panel
-            </button>
-
+        <div style={{ height: "899px", marginTop: "103px", marginLeft: "60px" }} data-theme={theme}>
             <DockviewReact
                 onReady={onReady}
-                className={dockviewTheme} 
+                className={dockviewTheme}
                 components={{
-                    editor: () => <Editor />,
+                    watchlist: () => <Watchlist />,
                     terminal: () => <Terminal />,
                     logs: () => <Logs />,
                 }}
