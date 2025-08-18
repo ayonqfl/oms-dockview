@@ -7,7 +7,7 @@ const Topbar = ({ onAddLogs }) => {
         <h4>OMS QFL</h4>
       </div>
       <div className="topbar-content"> 
-         <button onClick={onAddLogs} type="button" class="btn btn-primary btn-sm">Add Panel</button>
+         <button onClick={onAddLogs} type="button" className="btn btn-sm" style={{ backgroundColor: '#0dcaf0' }}>Add Panel</button>
          <ThemeSwitcher />
       </div>
     </nav>
