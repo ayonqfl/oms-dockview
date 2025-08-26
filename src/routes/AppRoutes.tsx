@@ -5,7 +5,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Dashboard from "../pages/Dashboard";
 import TradeView from "../pages/TradeView";
 
-function AppRoutes() {
+function AppRoutes(): JSX.Element {
   return (
     <Routes>
       <Route path="/" element={<DashboardLayout />}>

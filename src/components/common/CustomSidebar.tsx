@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightLeft, faHouse } from "@fortawesome/free-solid-svg-icons";
+import { faRightLeft, faHouse, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { Link, useLocation } from "react-router-dom";
 import "../../styles/CustomSidebar.css";
 
-const Item = ({ title, to, icon, selected, setSelected }) => {
+interface ItemProps {
+  title: string;
+  to: string;
+  icon: IconDefinition;
+  selected: string;
+  setSelected: (title: string) => void;
+}
+
+const Item = ({ title, to, icon, selected, setSelected }: ItemProps): JSX.Element => {
   return (
     <div className="menu-item-container">
       <Link 
@@ -19,9 +27,9 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
   );
 };
 
-const CustomSidebar = () => {
+const CustomSidebar = (): JSX.Element => {
   const location = useLocation();
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState<string>("");
 
   useEffect(() => {
     // Set the active item based on current route
