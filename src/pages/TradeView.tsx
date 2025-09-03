@@ -2,6 +2,7 @@ import { DockviewReact, DockviewApi, DockviewComponentProps } from "dockview";
 import { useRef, useState, useEffect } from "react";
 import { useTheme } from "../utilities/context/ThemeContext";
 import { useOutletContext } from "react-router-dom";
+import { DockviewHeaderControls } from "../components/docview/DockviewHeaderControls";
 
 import Terminal from "../components/widgets/Terminal";
 import Watchlist from "../components/widgets/Watchlist";
@@ -79,6 +80,7 @@ const TradeView = (): JSX.Element => {
           terminal: (props: DockviewComponentProps) => <Terminal {...props} />,
           logs: (props: DockviewComponentProps) => <Logs {...props} />,
         }}
+        rightHeaderActionsComponent={DockviewHeaderControls}
       />
     </div>
   );
