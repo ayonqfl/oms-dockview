@@ -7,21 +7,18 @@ import "../styles/dashboard.css";
 
 // Define the type for Outlet context
 interface DashboardLayoutContext {
-  addLogsTrigger: boolean;
+  addPanelName: string | null;
 }
 
 const DashboardLayout = (): JSX.Element => {
-  // State to trigger adding logs panel
-  const [addLogsTrigger, setAddLogsTrigger] = useState<boolean>(false);
+  const [addPanelName, setAddPanelName] = useState<string | null>(null);
 
-  // Function passed to Topbar
-  const handleAddLogs = () => {
-    // Toggle trigger to notify routed component
-    setAddLogsTrigger((prev) => !prev);
+  const handleAddLogs = (panelName: string) => {
+    setAddPanelName(panelName);
   };
 
   return (
-    <div className="d-flex" style={{ minHeight: "100vh" }}>
+     <div className="d-flex" style={{ minHeight: "100vh" }}>
       <div>
         <CustomSidebar />
       </div>
@@ -31,8 +28,7 @@ const DashboardLayout = (): JSX.Element => {
 
         <div className="d-flex flex-grow-1 dashboard-content">
           <div className="container-fluid">
-            {/* Pass addLogsTrigger to routed components via Outlet context */}
-            <Outlet context={{ addLogsTrigger } as DashboardLayoutContext} />
+            <Outlet context={{ addPanelName } as DashboardLayoutContext} />
           </div>
         </div>
       </div>

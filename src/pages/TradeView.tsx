@@ -6,16 +6,24 @@ import { DockviewHeaderControls } from "../components/docview/DockviewHeaderCont
 
 import Terminal from "../components/widgets/Terminal";
 import Watchlist from "../components/widgets/Watchlist";
-import Logs from "../components/widgets/Logs";
+import MarketDepth from "../components/widgets/MarketDepth";
+import MarketWatch from "../components/widgets/MarketWatch";
 
 const LAYOUT_STORAGE_KEY = "tradeview_layout";
 
 interface OutletContextType {
-  addLogsTrigger: number; // adjust type if your trigger is different
+  addPanelName: string | null;
 }
 
 const TradeView = (): JSX.Element => {
-  const { addLogsTrigger } = useOutletContext<OutletContextType>();
+    const componentMap: Record<string, string> = {
+    "Watchlist": "watchlist",
+    "Market Watch": "marketwatch",
+    "Order Terminal": "terminal", 
+    "Market Depth": "marketdepth", 
+  };
+
+  const { addPanelName } = useOutletContext<OutletContextType>();
   const { theme } = useTheme();
 
   const dockviewRef = useRef<DockviewApi | null>(null);
@@ -33,17 +41,25 @@ const TradeView = (): JSX.Element => {
     return () => disposable.dispose();
   }, [api]);
 
-  // Add logs panel whenever trigger changes
+ 
+  // Add panel whenever dropdown selection changes
   useEffect(() => {
-    if (!dockviewRef.current) return;
+    if (!dockviewRef.current || !addPanelName) return;
 
-    const id = `logs-${Date.now()}`;
+    const componentKey = componentMap[addPanelName];
+    if (!componentKey) {
+      console.warn(`No component registered for panel: ${addPanelName}`);
+      return;
+    }
+
+    const id = `${componentKey}-${Date.now()}`; // unique id
     dockviewRef.current.addPanel({
       id,
-      component: "logs",
-      title: `Logs (${id.slice(-4)})`,
+      component: componentKey,
+      title: addPanelName,
     });
-  }, [addLogsTrigger]);
+  }, [addPanelName]);
+
 
   const dockviewTheme = theme === "dark" ? "dockview-theme-dark" : "dockview-theme-light";
 
@@ -78,7 +94,8 @@ const TradeView = (): JSX.Element => {
         components={{
           watchlist: (props: DockviewComponentProps) => <Watchlist {...props} />,
           terminal: (props: DockviewComponentProps) => <Terminal {...props} />,
-          logs: (props: DockviewComponentProps) => <Logs {...props} />,
+          marketdepth: (props: DockviewComponentProps) => <MarketDepth {...props} />, 
+          marketwatch: (props: DockviewComponentProps) => <MarketWatch {...props} />,
         }}
         rightHeaderActionsComponent={DockviewHeaderControls}
       />
