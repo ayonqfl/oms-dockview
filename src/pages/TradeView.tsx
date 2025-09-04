@@ -24,8 +24,8 @@ const componentMap: Record<string, string> = {
 };
 
 const initialPanels = [
-  { id: "watchlist", component: "watchlist", title: "Watchlist" },
-  { id: "terminal", component: "terminal", title: "Terminal" },
+  { id: "watchlist-1", component: "watchlist", title: "Watchlist 1" },
+  { id: "terminal-1", component: "terminal", title: "Order Terminal 1" },
 ];
 
 const TradeView = (): JSX.Element => {
@@ -49,40 +49,59 @@ const TradeView = (): JSX.Element => {
     return () => disposable.dispose();
   }, [api]);
 
-  /** Find existing panel by id, component, or title */
-  const findExistingPanel = (apiInstance: DockviewApi, componentKey: string, title?: string) => {
+  /** Generate unique panel ID and title */
+  const generateUniquePanel = (apiInstance: DockviewApi, panelName: string) => {
+    const baseKey = componentMap[panelName];
+    if (!baseKey) return null;
+
     const panels: any[] = typeof (apiInstance as any).getPanels === "function"
       ? (apiInstance as any).getPanels()
       : (apiInstance as any).panels ?? [];
 
-    return panels.find(p => {
-      const pid = p?.id ?? p?.panelId ?? "";
-      const pcomp = p?.component ?? p?.descriptor ?? p?.componentId ?? "";
-      const ptitle = p?.title ?? p?.label ?? "";
+    // Special case: Market Watch is single instance
+    if (panelName === "Market Watch") {
+      const existing = panels.find(p => p.title === "Market Watch");
+      if (existing) return null; // already exists
+      return { newTitle: "Market Watch", newId: "marketwatch-1" };
+    }
 
-      return [pid, pcomp, ptitle].includes(componentKey) || ptitle === title || String(pcomp).includes(componentKey);
-    });
+    // For other panels, allow multiple numbered instances
+    const existingTitles = panels
+      .map(p => p.title)
+      .filter(t => t.startsWith(panelName));
+
+    let nextNum = 1;
+    while (existingTitles.includes(`${panelName} ${nextNum}`)) {
+      nextNum++;
+    }
+
+    const newTitle = `${panelName} ${nextNum}`;
+    const newId = `${baseKey}-${nextNum}`;
+    return { newTitle, newId };
   };
 
-  /** Add or focus a panel */
-  const addOrFocusPanel = (apiInstance: DockviewApi, panelName: string) => {
-    const componentKey = componentMap[panelName];
-    if (!componentKey) return toast.error(`"${panelName}" is not available`);
 
-    const existing = findExistingPanel(apiInstance, componentKey, panelName);
-    if (existing) {
-      existing.setActive?.();
-      return toast.info(`${panelName} is already open`, { toastId: `already-open-${componentKey}` });
+  /** Add a new panel with unique title */
+  const addOrFocusPanel = (apiInstance: DockviewApi, panelName: string) => {
+    const uniquePanel = generateUniquePanel(apiInstance, panelName);
+    if (!uniquePanel) {
+      if (panelName === "Market Watch") {
+        return toast.info(`Market Watch is already open`, { toastId: `already-open-marketwatch` });
+      }
+      return toast.error(`"${panelName}" cannot be added`);
     }
+
+    const { newId, newTitle } = uniquePanel;
 
     try {
-      apiInstance.addPanel({ id: componentKey, component: componentKey, title: panelName });
-      toast.success(`${panelName} added`, { toastId: `added-${componentKey}` });
+      apiInstance.addPanel({ id: newId, component: componentMap[panelName], title: newTitle });
+      toast.success(`${newTitle} added`, { toastId: `added-${newId}` });
     } catch (err) {
       console.error("addPanel failed", err);
-      toast.error(`Failed to add ${panelName}`);
+      toast.error(`Failed to add ${newTitle}`);
     }
   };
+
 
   /** Handle addPanelName changes */
   useEffect(() => {
@@ -91,7 +110,7 @@ const TradeView = (): JSX.Element => {
       addOrFocusPanel(dockviewRef.current, addPanelName);
       pendingAddRef.current = null;
     } else {
-      pendingAddRef.current = componentMap[addPanelName] ?? null;
+      pendingAddRef.current = addPanelName;
     }
   }, [addPanelName]);
 
@@ -117,8 +136,7 @@ const TradeView = (): JSX.Element => {
     const pending = pendingAddRef.current;
     if (pending) {
       setTimeout(() => {
-        const panelName = Object.entries(componentMap).find(([, v]) => v === pending)?.[0] || pending;
-        addOrFocusPanel(api, panelName);
+        addOrFocusPanel(api, pending);
         pendingAddRef.current = null;
       }, 50);
     }
