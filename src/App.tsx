@@ -1,7 +1,9 @@
 // default modules imports
 import { BrowserRouter as Router } from "react-router-dom";
 import { useTheme }  from "./utilities/context/ThemeContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"; 
+import { ToastContainer } from "react-toastify";
+import "../node_modules/react-toastify/dist/ReactToastify.css";
 
 // custom modules imports
 import AppRoutes from "./routes/AppRoutes";
@@ -25,6 +27,7 @@ function App(): JSX.Element {
       <Router>
         <AppRoutes />
       </Router>
+       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

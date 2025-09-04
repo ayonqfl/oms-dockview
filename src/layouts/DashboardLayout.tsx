@@ -13,9 +13,11 @@ interface DashboardLayoutContext {
 const DashboardLayout = (): JSX.Element => {
   const [addPanelName, setAddPanelName] = useState<string | null>(null);
 
-  const handleAddLogs = (panelName: string) => {
-    setAddPanelName(panelName);
-  };
+const handleAddLogs = (panelName: string) => {
+  setAddPanelName(panelName);
+  // Reset to allow re-adding same panel
+  setTimeout(() => setAddPanelName(null), 50);
+};
 
   return (
      <div className="d-flex" style={{ minHeight: "100vh" }}>
