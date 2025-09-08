@@ -145,18 +145,55 @@ const TradeView = (): JSX.Element => {
   const dockviewTheme = theme === "dark" ? "dockview-theme-dark" : "dockview-theme-light";
 
   return (
-    <div style={{ height: "899px", marginTop: "103px", marginLeft: "60px" }} data-theme={theme}>
+    <div style={{ height: "899px", marginTop: "80px", marginLeft: "50px" }} data-theme={theme}>
       <DockviewReact
-        onReady={onReady}
-        className={dockviewTheme}
-        components={{
-          watchlist: (props: DockviewComponentProps) => <Watchlist {...props} />,
-          terminal: (props: DockviewComponentProps) => <Terminal {...props} />,
-          marketdepth: (props: DockviewComponentProps) => <MarketDepth {...props} />,
-          marketwatch: (props: DockviewComponentProps) => <MarketWatch {...props} />,
-        }}
-        rightHeaderActionsComponent={DockviewHeaderControls}
-      />
+          onReady={onReady}
+          className={dockviewTheme}
+          components={{
+            watchlist: (props: DockviewComponentProps) => (
+              <div
+                style={{
+                  height: "100%", 
+                  overflow: "auto",
+                }}
+              >
+                <Watchlist {...props} />
+              </div>
+            ),
+            terminal: (props: DockviewComponentProps) => (
+              <div
+                style={{
+                  height: "100%", 
+                  overflow: "auto",
+                }}
+              >
+                <Terminal {...props} />
+              </div>
+            ),
+            marketdepth: (props: DockviewComponentProps) => (
+              <div
+                style={{
+                  height: "100%", 
+                  overflow: "auto",
+                }}
+              >
+                <MarketDepth {...props} />
+              </div>
+            ),
+            marketwatch: (props: DockviewComponentProps) => (
+              <div
+                style={{
+                  height: "100%", 
+                  overflow: "auto",
+                }}
+              >
+                <MarketWatch {...props} />
+              </div>
+            ),
+          }}
+          rightHeaderActionsComponent={DockviewHeaderControls}
+        />
+
     </div>
   );
 };

@@ -830,3 +830,20 @@
     align-items: center;
     gap: 20px;
 }
+
+.ag-root-wrapper {
+  border: none !important;
+  border-radius: none !important;
+}
+
+.ag-row {
+  border-bottom: none !important;
+}
+
+/* Text alignment */
+.ag-container.ag-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}

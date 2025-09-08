@@ -29,7 +29,7 @@ const handleAddLogs = (panelName: string) => {
         <Topbar onAddLogs={handleAddLogs} />
 
         <div className="d-flex flex-grow-1 dashboard-content">
-          <div className="container-fluid">
+          <div className="container-fluid" style={{ paddingRight: "1px" }}>
             <Outlet context={{ addPanelName } as DashboardLayoutContext} />
           </div>
         </div>

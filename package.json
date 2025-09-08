@@ -13,6 +13,8 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.1",
+    "ag-grid-community": "^34.1.2",
+    "ag-grid-react": "^34.1.2",
     "bootstrap": "^5.3.7",
     "dockview": "^4.5.0",
     "react": "^19.1.0",
