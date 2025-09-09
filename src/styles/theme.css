@@ -847,3 +847,47 @@
   justify-content: center;
   font-weight: 500;
 }
+
+/*================= Login Page Styles================= */
+.login_page_container{ 
+    height: 100vh;
+    background: #18181a;
+}
+
+/* MarketWatch.css */
+
+.flash-up {
+  animation: flashUp 0.3s;
+  color: green;
+}
+
+.flash-down {
+  animation: flashDown 0.3s;
+  color: red;
+}
+
+@keyframes flashUp {
+  0% { background-color: #b6fcb6; }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashDown {
+  0% { background-color: #fcb6b6; }
+  100% { background-color: transparent; }
+}
+
+.text-success {
+  color: green;
+}
+
+.text-danger {
+  color: red;
+}
+
+.bg-success {
+  background-color: #d4edda;
+}
+
+.bg-danger {
+  background-color: #f8d7da;
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightLeft, faHouse, IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import { faRightLeft, faHouse, faRightFromBracket, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { Link, useLocation } from "react-router-dom";
 import "../../styles/CustomSidebar.css";
 
@@ -32,11 +32,12 @@ const CustomSidebar = (): JSX.Element => {
   const [selected, setSelected] = useState<string>("");
 
   useEffect(() => {
-    // Set the active item based on current route
     if (location.pathname.includes("/dashboard")) {
       setSelected("Dashboard");
     } else if (location.pathname.includes("/trade")) {
       setSelected("Trade");
+    } else if (location.pathname.includes("/logout")) {
+      setSelected("Logout");
     }
   }, [location.pathname]);
 
@@ -55,6 +56,13 @@ const CustomSidebar = (): JSX.Element => {
             title="Trade"
             to="/trade"
             icon={faRightLeft}
+            selected={selected}
+            setSelected={setSelected}
+          />
+          <Item
+            title="Logout"
+            to="/logout"
+            icon={faRightFromBracket}
             selected={selected}
             setSelected={setSelected}
           />
