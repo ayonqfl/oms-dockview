@@ -111,7 +111,7 @@ const symbolsSlicer = createSlice({
         symbol.vwap = vwap;
       }
     },
-
+ 
     updateBBO(state, action: PayloadAction<UpdateBboPayload>) {
       const { s, g, bp, bq, ap, aq } = action.payload;
       const symbolKey = `${s}.${g}`;

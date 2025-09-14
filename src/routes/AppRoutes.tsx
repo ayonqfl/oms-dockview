@@ -21,23 +21,24 @@ function AppRoutes({ isAuthenticated }: AppRoutesProps): JSX.Element {
       {/* Public route */}
       <Route
         path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
       />
-
       {/* Protected routes */}
       <Route element={<AuthRoute isAuthenticated={isAuthenticated} />}>
-        <Route path="/" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/trade" replace />} />
+
+        <Route path="/" element={<DashboardLayout isAuthenticated={isAuthenticated}/>}>
+          <Route index element={<Dashboard />} />  
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="trade" element={<TradeView />} />
           <Route path="logout" element={<Logout />} />
         </Route>
+
       </Route>
 
       {/* Catch all */}
       <Route
         path="*"
-        element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />}
+        element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
       />
     </Routes>
   );

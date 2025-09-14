@@ -52,7 +52,7 @@ const Login: React.FC = () => {
 
       setCookiesFromAuthResponse(res.data);
       dispatch(login(res.data));
-      navigate("/trade");
+      navigate("/dashboard");
     } catch (err) {
       errorHandler(err);
     } finally {
