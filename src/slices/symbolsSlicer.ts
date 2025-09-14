@@ -52,6 +52,7 @@ interface UpdateLtpPayload {
 }
 
 interface UpdateBboPayload {
+  xc: "DSE" | "CSE";
   s: string;
   g: string;
   bp: number;
@@ -90,9 +91,9 @@ const symbolsSlicer = createSlice({
     },
 
     updateLtp(state, action: PayloadAction<UpdateLtpPayload>) {
-      const { xc, s, g, p, eq, ch, chp, tvl, tq, o, h, l, cu, cd, vwap, dh, dl } =
-        action.payload;
+      const { xc, s, g, p, eq, ch, chp, tvl, tq, o, h, l, cu, cd, vwap, dh, dl } = action.payload;
       const symbolKey = `${s}.${g}`;
+
       if (xc === "DSE" && state.symbols[symbolKey]) {
         const symbol = state.symbols[symbolKey];
         symbol.ltp = p;
@@ -113,9 +114,9 @@ const symbolsSlicer = createSlice({
     },
  
     updateBBO(state, action: PayloadAction<UpdateBboPayload>) {
-      const { s, g, bp, bq, ap, aq } = action.payload;
+      const { xc, s, g, bp, bq, ap, aq } = action.payload;
       const symbolKey = `${s}.${g}`;
-      if (state.bbo_symbols[symbolKey]) {
+      if (xc === "DSE" && state.bbo_symbols[symbolKey]) {
         const symbol = state.bbo_symbols[symbolKey];
         symbol.bid = bp;
         symbol.bidqty = bq;

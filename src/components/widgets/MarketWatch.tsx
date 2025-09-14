@@ -79,7 +79,6 @@ const MarketWatch: React.FC = () => {
       ask: bbos[item.symbol]?.ask || 0,
       askqty: bbos[item.symbol]?.askqty || 0,
     }));
-    
     setRowDataState(newRowData);
   }, [symbols, bbos]);
 
