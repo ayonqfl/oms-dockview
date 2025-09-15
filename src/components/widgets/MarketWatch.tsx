@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, useState, useCallback } from "react";
+import React, { useMemo, useRef, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { AgGridReact } from "ag-grid-react";
 import { ColDef, GridApi, ColumnApi, GridReadyEvent } from "ag-grid-community";
@@ -29,32 +29,18 @@ interface SymbolItem {
   last_vol: number;
 }
 
-interface BBOData {
-  [symbol: string]: {
-    bid: number;
-    bidqty: number;
-    ask: number;
-    askqty: number;
-  };
-}
-
-// Helper function to safely format numbers
+// ✅ Number formatters
 const formatNumber = (value: any, decimals: number = 2): string => {
-  if (value === null || value === undefined || value === '') return '';
-  
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(num)) return '';
-  
+  if (value === null || value === undefined || value === "") return "";
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(num)) return "";
   return num.toFixed(decimals);
 };
 
-// Helper function to format large numbers with commas
 const formatLargeNumber = (value: any): string => {
-  if (value === null || value === undefined || value === '') return '';
-  
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(num)) return '';
-  
+  if (value === null || value === undefined || value === "") return "";
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(num)) return "";
   return num.toLocaleString();
 };
 
@@ -62,235 +48,88 @@ const MarketWatch: React.FC = () => {
   const { theme } = useTheme();
   const gridApi = useRef<GridApi | null>(null);
   const gridColumnApi = useRef<ColumnApi | null>(null);
-  const [rowDataState, setRowDataState] = useState<SymbolItem[]>([]);
   const isUserInteractingRef = useRef(false);
 
-  const symbols: Record<string, SymbolItem> = useSelector(
-    (state: any) => state.symbols.symbols
-  );
-  const bbos: BBOData = useSelector((state: any) => state.symbols.bbo_symbols);
+  // ✅ now only one source of truth
+  const symbols: Record<string, SymbolItem> = useSelector( (state: any) => state.symbols.symbols);
 
-  // Merge symbols + BBO and update state
-  useEffect(() => {
-    const newRowData = (Object.values(symbols || {}) as SymbolItem[]).map((item) => ({
-      ...item,
-      bid: bbos[item.symbol]?.bid || 0,
-      bidqty: bbos[item.symbol]?.bidqty || 0,
-      ask: bbos[item.symbol]?.ask || 0,
-      askqty: bbos[item.symbol]?.askqty || 0,
-    }));
-    setRowDataState(newRowData);
-  }, [symbols, bbos]);
-
-  // Check if user is currently interacting with columns
+  // Check if user is interacting with grid headers
   const isUserInteracting = useCallback((): boolean => {
-    // Check for resize handles
-    const resizeHandles = document.querySelectorAll('.ag-header-cell-resize');
-    const isResizing = Array.from(resizeHandles).some(handle => 
-      handle.classList.contains('ag-active')
+    const resizeHandles = document.querySelectorAll(".ag-header-cell-resize");
+    const isResizing = Array.from(resizeHandles).some((handle) =>
+      handle.classList.contains("ag-active")
     );
-    
-    // Check for column dragging
-    const headerCells = document.querySelectorAll('.ag-header-cell');
-    const isDragging = Array.from(headerCells).some(cell => 
-      cell.classList.contains('ag-column-moving')
+
+    const headerCells = document.querySelectorAll(".ag-header-cell");
+    const isDragging = Array.from(headerCells).some((cell) =>
+      cell.classList.contains("ag-column-moving")
     );
-    
+
     return isResizing || isDragging || isUserInteractingRef.current;
   }, []);
 
-  // Update only visible rows without interfering with column operations
+  
+  // 🔹 Update only changed rows
   useEffect(() => {
     if (!gridApi.current) return;
-
-    // Don't update if user is interacting with columns
-    if (isUserInteracting()) {
-      return;
-    }
-
-    const api = gridApi.current;
-    const visibleNodes = api.getRenderedNodes();
+    if (isUserInteracting()) return;
 
     const updatedRows: SymbolItem[] = [];
 
-    visibleNodes.forEach((node) => {
-      const newData = rowDataState.find((row) => row.symbol === node.data.symbol);
-      if (newData) {
-        let changed = false;
-        for (const key in newData) {
-          if (newData[key as keyof SymbolItem] !== node.data[key as keyof SymbolItem]) {
-            changed = true;
-            break;
-          }
-        }
-        if (changed) {
-          updatedRows.push(newData);
-        }
+    gridApi.current.forEachNode((node) => {
+      const symbol = node.data.symbol;
+      const newData = symbols[symbol];
+      if (!newData) return;
+
+      // compare shallowly – update only if some field has changed
+      const hasChanged = Object.keys(newData).some(
+        (key) => newData[key as keyof SymbolItem] !== node.data[key as keyof SymbolItem]
+      );
+
+      if (hasChanged) {
+        updatedRows.push(newData);
       }
     });
 
     if (updatedRows.length > 0) {
-      api.applyTransactionAsync({ update: updatedRows });
+      gridApi.current.applyTransactionAsync({ update: updatedRows });
     }
-  }, [rowDataState, isUserInteracting]);
+  }, [symbols, isUserInteracting]);
+
 
   // Column definitions
   const columnDefs: ColDef[] = useMemo(
     () => [
-      { 
-        field: "symbol", 
-        headerName: "Symbol", 
-        checkboxSelection: true, 
-        width: 120,
-        pinned: 'left',
+      {
+        field: "symbol",
+        headerName: "Symbol",
+        checkboxSelection: true,
+        width: 130,
+        pinned: "left",
         lockPinned: true,
-        lockVisible: true
+        lockVisible: true,
       },
-      { 
-        field: "company_name", 
-        headerName: "Company Name", 
-        width: 200,
-        tooltipField: 'company_name'
-      },
+      { field: "company_name", headerName: "Company Name", width: 200, tooltipField: "company_name" },
       { field: "sector", headerName: "Sector", width: 120 },
       { field: "category", headerName: "Category", width: 120 },
-      { 
-        field: "coup_rate", 
-        headerName: "Coup. Rate", 
-        width: 100,
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "yield", 
-        headerName: "Yield", 
-        width: 80,
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "ltp", 
-        headerName: "LTP", 
-        width: 90, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "close", 
-        headerName: "CP", 
-        width: 90, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "ycp", 
-        headerName: "YCP", 
-        width: 90, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "volume", 
-        headerName: "Vol", 
-        width: 100, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatLargeNumber(params.value)
-      },
-      {
-        field: "change",
-        headerName: "Chg",
-        width: 80,
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2),
-        cellClass: (params) =>
-          params.value >= 0 ? "text-success" : "text-danger",
-      },
-      {
-        field: "change_per",
-        headerName: "% Chg",
-        width: 80,
-        type: "numericColumn",
-        valueFormatter: (params) => {
-          const formatted = formatNumber(params.value, 2);
-          return formatted ? `${formatted}%` : '';
-        },
-        cellClass: (params) =>
-          params.value >= 0 ? "text-success" : "text-danger",
-      },
-      {
-        field: "bidqty",
-        headerName: "B.Qty",
-        width: 80,
-        cellClass: "bg-success",
-        type: "numericColumn",
-        valueFormatter: (params) => formatLargeNumber(params.value)
-      },
-      {
-        field: "bid",
-        headerName: "BID",
-        width: 90,
-        cellClass: "bg-success",
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      {
-        field: "ask",
-        headerName: "ASK",
-        width: 90,
-        cellClass: "bg-danger",
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      {
-        field: "askqty",
-        headerName: "A.Qty",
-        width: 80,
-        cellClass: "bg-danger",
-        type: "numericColumn",
-        valueFormatter: (params) => formatLargeNumber(params.value)
-      },
-      { 
-        field: "trades", 
-        headerName: "Trades", 
-        width: 90, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatLargeNumber(params.value)
-      },
-      {
-        field: "turnover",
-        headerName: "Turnover",
-        width: 110,
-        type: "numericColumn",
-        valueFormatter: (params) => formatLargeNumber(params.value)
-      },
-      { 
-        field: "open", 
-        headerName: "Open", 
-        width: 90, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "high", 
-        headerName: "High", 
-        width: 90, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "low", 
-        headerName: "Low", 
-        width: 90, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatNumber(params.value, 2)
-      },
-      { 
-        field: "last_vol", 
-        headerName: "L.VOL", 
-        width: 80, 
-        type: "numericColumn",
-        valueFormatter: (params) => formatLargeNumber(params.value)
-      },
+      { field: "coup_rate", headerName: "Coup. Rate", width: 100, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "yield", headerName: "Yield", width: 80, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "ltp", headerName: "LTP", width: 90, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "close", headerName: "CP", width: 90, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "ycp", headerName: "YCP", width: 90, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "volume", headerName: "Vol", width: 100, type: "numericColumn", valueFormatter: (p) => formatLargeNumber(p.value) },
+      { field: "change", headerName: "Chg", width: 80, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2), cellClass: (p) => (p.value >= 0 ? "text-success" : "text-danger") },
+      { field: "change_per", headerName: "% Chg", width: 80, type: "numericColumn", valueFormatter: (p) => (formatNumber(p.value, 2) ? `${formatNumber(p.value, 2)}%` : ""), cellClass: (p) => (p.value >= 0 ? "text-success" : "text-danger") },
+      { field: "bidqty", headerName: "B.Qty", width: 80, cellClass: "bg-success", type: "numericColumn", valueFormatter: (p) => formatLargeNumber(p.value) },
+      { field: "bid", headerName: "BID", width: 90, cellClass: "bg-success", type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "ask", headerName: "ASK", width: 90, cellClass: "bg-danger", type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "askqty", headerName: "A.Qty", width: 80, cellClass: "bg-danger", type: "numericColumn", valueFormatter: (p) => formatLargeNumber(p.value) },
+      { field: "trades", headerName: "Trades", width: 90, type: "numericColumn", valueFormatter: (p) => formatLargeNumber(p.value) },
+      { field: "turnover", headerName: "Turnover", width: 110, type: "numericColumn", valueFormatter: (p) => formatLargeNumber(p.value) },
+      { field: "open", headerName: "Open", width: 90, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "high", headerName: "High", width: 90, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "low", headerName: "Low", width: 90, type: "numericColumn", valueFormatter: (p) => formatNumber(p.value, 2) },
+      { field: "last_vol", headerName: "L.VOL", width: 80, type: "numericColumn", valueFormatter: (p) => formatLargeNumber(p.value) },
     ],
     []
   );
@@ -303,43 +142,37 @@ const MarketWatch: React.FC = () => {
 
   const onColumnResized = useCallback(() => {
     isUserInteractingRef.current = true;
-    setTimeout(() => {
-      isUserInteractingRef.current = false;
-    }, 100);
+    setTimeout(() => (isUserInteractingRef.current = false), 100);
   }, []);
 
   const onColumnMoved = useCallback(() => {
     isUserInteractingRef.current = true;
-    setTimeout(() => {
-      isUserInteractingRef.current = false;
-    }, 100);
+    setTimeout(() => (isUserInteractingRef.current = false), 100);
   }, []);
 
   const onSortChanged = useCallback(() => {
     isUserInteractingRef.current = true;
-    setTimeout(() => {
-      isUserInteractingRef.current = false;
-    }, 100);
+    setTimeout(() => (isUserInteractingRef.current = false), 100);
   }, []);
 
   return (
     <div
       className={theme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine"}
-      style={{ height: "500px", width: "100%" }}
+      style={{ height: "800px", width: "100%" }}
     >
       <AgGridReact
-        rowData={rowDataState}
+        rowData={Object.values(symbols)} // initial load
         getRowId={(params) => params.data.symbol}
-        deltaRowDataMode={true}
         headerHeight={32}
         rowHeight={30}
-        columnDefs={columnDefs}
-        animateRows={true}
+        deltaRowDataMode={true}
         immutableData={true}
-        rowSelection="multiple"
-        suppressHorizontalScroll={false}
-        enableCellChangeFlash={true}
-        domLayout="normal"
+        animateRows={true}
+        columnDefs={columnDefs}
+        onGridReady={onGridReady}
+        onColumnResized={onColumnResized}
+        onColumnMoved={onColumnMoved}
+        onSortChanged={onSortChanged}
         defaultColDef={{
           flex: 1,
           minWidth: 80,
@@ -349,13 +182,6 @@ const MarketWatch: React.FC = () => {
           suppressSizeToFit: false,
           enableCellChangeFlash: true,
         }}
-        onGridReady={onGridReady}
-        onColumnResized={onColumnResized}
-        onColumnMoved={onColumnMoved}
-        onSortChanged={onSortChanged}
-        suppressColumnVirtualisation={true}
-        suppressRowClickSelection={true}
-        stopEditingWhenCellsLoseFocus={true}
       />
     </div>
   );

@@ -2,10 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 // Redux slices
-import { updateLtp, updateBBO, updateCp } from "../../slices/symbolsSlicer";
-import { updateTimeSales } from "../../slices/timeAndSalesSlicer";
-import { updateIndex } from "../../slices/indexSlicer";
-import { updateDseMktHealth, updateCseMktHealth } from "../../slices/GlobalMarketSlicer";
+import { updateLtp, updateBBO} from "../../slices/symbolsSlicer";
 
 // Type for the message received from worker
 interface WorkerMessage {
@@ -39,21 +36,7 @@ const WsFeedMd: React.FC = () => {
         case "bbo":
           dispatch(updateBBO(msg));
           break;
-        // case "cp":
-        //   dispatch(updateCp(msg));
-        //   break;
-        // case "timeSales":
-        //   dispatch(updateTimeSales(msg));
-        //   break;
-        // case "index":
-        //   dispatch(updateIndex(msg));
-        //   break;
-        // case "dseMktHealth":
-        //   dispatch(updateDseMktHealth(msg));
-        //   break;
-        // case "cseMktHealth":
-        //   dispatch(updateCseMktHealth(msg));
-        //   break;
+         
       }
     };
 

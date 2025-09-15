@@ -12,22 +12,21 @@ interface SymbolEntry {
   high?: number;
   low?: number;
   close?: number;
-  cu?: number;  // upper circuit?
-  cd?: number;  // lower circuit?
+  cu?: number;
+  cd?: number;
   vwap?: number;
-  dh?: number;  // day high?
-  dl?: number;  // day low?
+  dh?: number;
+  dl?: number;
   bid?: number;
   bidqty?: number;
   ask?: number;
   askqty?: number;
-  [key: string]: any; // flexible for future props
+  [key: string]: any;
 }
 
 // ✅ State type
 interface SymbolsState {
   symbols: Record<string, SymbolEntry>;
-  bbo_symbols: Record<string, SymbolEntry>;
 }
 
 // ✅ Payloads
@@ -75,23 +74,23 @@ interface UpdateCpPayload {
 
 const initialState: SymbolsState = {
   symbols: {},
-  bbo_symbols: {},
 };
 
 const symbolsSlicer = createSlice({
   name: "symbols",
   initialState,
   reducers: {
+    // ✅ Add/merge symbols
     setSymbols(state, action: PayloadAction<Record<string, SymbolEntry>>) {
-      state.symbols = action.payload;
+      Object.entries(action.payload).forEach(([key, value]) => {
+        state.symbols[key] = { ...state.symbols[key], ...value };
+      });
     },
 
-    setGlobalBBO(state, action: PayloadAction<Record<string, SymbolEntry>>) {
-      state.bbo_symbols = action.payload;
-    },
-
+    // ✅ Update LTP + market stats
     updateLtp(state, action: PayloadAction<UpdateLtpPayload>) {
-      const { xc, s, g, p, eq, ch, chp, tvl, tq, o, h, l, cu, cd, vwap, dh, dl } = action.payload;
+      const { xc, s, g, p, eq, ch, chp, tvl, tq, o, h, l, cu, cd, vwap, dh, dl } =
+        action.payload;
       const symbolKey = `${s}.${g}`;
 
       if (xc === "DSE" && state.symbols[symbolKey]) {
@@ -112,12 +111,14 @@ const symbolsSlicer = createSlice({
         symbol.vwap = vwap;
       }
     },
- 
+
+    // ✅ Update BBO directly inside symbols
     updateBBO(state, action: PayloadAction<UpdateBboPayload>) {
       const { xc, s, g, bp, bq, ap, aq } = action.payload;
       const symbolKey = `${s}.${g}`;
-      if (xc === "DSE" && state.bbo_symbols[symbolKey]) {
-        const symbol = state.bbo_symbols[symbolKey];
+
+      if (xc === "DSE" && state.symbols[symbolKey]) {
+        const symbol = state.symbols[symbolKey];
         symbol.bid = bp;
         symbol.bidqty = bq;
         symbol.ask = ap;
@@ -125,9 +126,11 @@ const symbolsSlicer = createSlice({
       }
     },
 
+    // ✅ Update closing price info
     updateCp(state, action: PayloadAction<UpdateCpPayload>) {
       const { xc, s, g, ch, chp, o, h, l, c } = action.payload;
       const symbolKey = `${s}.${g}`;
+
       if (xc === "DSE" && state.symbols[symbolKey]) {
         const symbol = state.symbols[symbolKey];
         symbol.change = ch;
@@ -145,13 +148,9 @@ const symbolsSlicer = createSlice({
   },
 });
 
-export const {
-  setSymbols,
-  clearSymbols,
-  updateLtp,
-  updateBBO,
-  updateCp,
-  setGlobalBBO,
-} = symbolsSlicer.actions;
+
+
+export const { setSymbols, clearSymbols, updateLtp, updateBBO, updateCp } =
+  symbolsSlicer.actions;
 
 export default symbolsSlicer.reducer;
