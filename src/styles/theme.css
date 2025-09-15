@@ -891,3 +891,13 @@
 .bg-danger {
   background-color: #f8d7da;
 }
+
+.bid-bg{
+  background-color: rgb(9, 68, 54);
+  color: #ffffff;
+}
+
+.ask-bg{
+  background-color: rgb(100, 18, 43);
+   color: #ffffff;
+}

@@ -19,7 +19,7 @@ const generateToken = (): string => {
 };
 
 const token = generateToken();
-const node_socket_md_host = "https://ws-md.uftcl.com"; // <-- Replace with your actual host
+const node_socket_md_host = "https://ws-md.quantbd.com"; // <-- Replace with your actual host
 
 let channel_and_fields: Record<string, ChannelConfig> = {
   bbo: { fields: ["bbo"], active: true },
