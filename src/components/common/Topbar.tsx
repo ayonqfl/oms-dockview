@@ -9,7 +9,8 @@ const panelList: string[] = [
   "Watchlist",
   "Market Watch",
   "Order Terminal",
-  "Market Depth"
+  "Market Depth",
+  "Portfolio",
 ];
 
 const Topbar = ({ onAddLogs }: TopbarProps): JSX.Element => {

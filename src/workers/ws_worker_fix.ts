@@ -52,7 +52,7 @@ const channel_and_fields: Record<string, ChannelConfig> = {
 };
 
 // ✅ Socket
-const node_socket_host = "https://ws-fix.quantbd.com/";
+const node_socket_host = "https://ws-fix.uftcl.com/";
 
 const socket: Socket = io(node_socket_host, {
   autoConnect: false,

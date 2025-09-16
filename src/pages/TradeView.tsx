@@ -1,14 +1,20 @@
-import React, { useRef, useState, useEffect } from "react";
-import { DockviewReact, DockviewApi, DockviewComponentProps } from "dockview";
+import { useRef, useState, useEffect } from "react";
+import {
+  DockviewReact,
+  DockviewApi,
+  DockviewComponentProps,
+} from "dockview";
 import { useTheme } from "../utilities/context/ThemeContext";
 import { useOutletContext } from "react-router-dom";
 import { DockviewHeaderControls } from "../components/docview/DockviewHeaderControls";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 import Terminal from "../components/widgets/Terminal";
 import Watchlist from "../components/widgets/Watchlist";
 import MarketDepth from "../components/widgets/MarketDepth";
 import MarketWatch from "../components/widgets/MarketWatch";
+import Portfolio from "../components/widgets/Portfolio";
 
 const LAYOUT_STORAGE_KEY = "tradeview_layout";
 
@@ -16,11 +22,16 @@ interface OutletContextType {
   addPanelName: string | null;
 }
 
+interface RootState {
+  user: any; // 🔑 replace with your UserSlice type
+}
+
 const componentMap: Record<string, string> = {
   "Watchlist": "watchlist",
   "Market Watch": "marketwatch",
   "Order Terminal": "terminal",
   "Market Depth": "marketdepth",
+  "Portfolio": "portfolio",
 };
 
 const initialPanels = [
@@ -31,6 +42,12 @@ const initialPanels = [
 const TradeView = (): JSX.Element => {
   const { addPanelName } = useOutletContext<OutletContextType>();
   const { theme } = useTheme();
+  const user = useSelector((state: RootState) => state.user);
+
+  const clientCode =
+    user?.userData?.users_roles === "client"
+      ? user?.userData?.username
+      : null;
 
   const dockviewRef = useRef<DockviewApi | null>(null);
   const [api, setApi] = useState<DockviewApi | null>(null);
@@ -50,25 +67,35 @@ const TradeView = (): JSX.Element => {
   }, [api]);
 
   /** Generate unique panel ID and title */
-  const generateUniquePanel = (apiInstance: DockviewApi, panelName: string) => {
+  const generateUniquePanel = (
+    apiInstance: DockviewApi,
+    panelName: string
+  ) => {
     const baseKey = componentMap[panelName];
     if (!baseKey) return null;
 
-    const panels: any[] = typeof (apiInstance as any).getPanels === "function"
-      ? (apiInstance as any).getPanels()
-      : (apiInstance as any).panels ?? [];
+    const panels: any[] =
+      typeof (apiInstance as any).getPanels === "function"
+        ? (apiInstance as any).getPanels()
+        : (apiInstance as any).panels ?? [];
 
-    // Special case: Market Watch is single instance
-    if (panelName === "Market Watch") {
-      const existing = panels.find(p => p.title === "Market Watch");
-      if (existing) return null; // already exists
-      return { newTitle: "Market Watch", newId: "marketwatch-1" };
+    // Special case: Market Watch & Portfolio are single instance
+    if (panelName === "Market Watch" || panelName === "Portfolio") {
+      const existing = panels.find(
+        (p) => p.title === panelName
+      );
+      if (existing) return null;
+
+      return {
+        newTitle: panelName,
+        newId: `${baseKey}-1`,
+      };
     }
 
     // For other panels, allow multiple numbered instances
     const existingTitles = panels
-      .map(p => p.title)
-      .filter(t => t.startsWith(panelName));
+      .map((p) => p.title)
+      .filter((t) => t.startsWith(panelName));
 
     let nextNum = 1;
     while (existingTitles.includes(`${panelName} ${nextNum}`)) {
@@ -80,13 +107,19 @@ const TradeView = (): JSX.Element => {
     return { newTitle, newId };
   };
 
-
   /** Add a new panel with unique title */
   const addOrFocusPanel = (apiInstance: DockviewApi, panelName: string) => {
     const uniquePanel = generateUniquePanel(apiInstance, panelName);
     if (!uniquePanel) {
       if (panelName === "Market Watch") {
-        return toast.info(`Market Watch is already open`, { toastId: `already-open-marketwatch` });
+        return toast.info(`Market Watch is already open`, {
+          toastId: `already-open-marketwatch`,
+        });
+      }
+      if (panelName === "Portfolio") {
+        return toast.info(`Portfolio is already open`, {
+          toastId: `already-open-portfolio`,
+        });
       }
       return toast.error(`"${panelName}" cannot be added`);
     }
@@ -94,14 +127,17 @@ const TradeView = (): JSX.Element => {
     const { newId, newTitle } = uniquePanel;
 
     try {
-      apiInstance.addPanel({ id: newId, component: componentMap[panelName], title: newTitle });
+      apiInstance.addPanel({
+        id: newId,
+        component: componentMap[panelName],
+        title: newTitle,
+      });
       toast.success(`${newTitle} added`, { toastId: `added-${newId}` });
     } catch (err) {
       console.error("addPanel failed", err);
       toast.error(`Failed to add ${newTitle}`);
     }
   };
-
 
   /** Handle addPanelName changes */
   useEffect(() => {
@@ -130,7 +166,7 @@ const TradeView = (): JSX.Element => {
         console.warn("Failed to restore layout", e);
       }
     }
-    if (!restored) initialPanels.forEach(panel => api.addPanel(panel));
+    if (!restored) initialPanels.forEach((panel) => api.addPanel(panel));
 
     // Process pending add panel
     const pending = pendingAddRef.current;
@@ -142,58 +178,50 @@ const TradeView = (): JSX.Element => {
     }
   };
 
-  const dockviewTheme = theme === "dark" ? "dockview-theme-dark" : "dockview-theme-light";
+  const dockviewTheme =
+    theme === "dark" ? "dockview-theme-dark" : "dockview-theme-light";
 
   return (
-    <div style={{ height: "899px", marginTop: "80px", marginLeft: "50px" }} data-theme={theme}>
+    <div
+      style={{ height: "899px", marginTop: "80px", marginLeft: "50px" }}
+      data-theme={theme}
+    >
       <DockviewReact
-          onReady={onReady}
-          className={dockviewTheme}
-          components={{
-            watchlist: (props: DockviewComponentProps) => (
-              <div
-                style={{
-                  height: "100%", 
-                  overflow: "auto",
-                }}
-              >
-                <Watchlist {...props} />
-              </div>
-            ),
-            terminal: (props: DockviewComponentProps) => (
-              <div
-                style={{
-                  height: "100%", 
-                  overflow: "auto",
-                }}
-              >
-                <Terminal {...props} />
-              </div>
-            ),
-            marketdepth: (props: DockviewComponentProps) => (
-              <div
-                style={{
-                  height: "100%", 
-                  overflow: "auto",
-                }}
-              >
-                <MarketDepth {...props} />
-              </div>
-            ),
-            marketwatch: (props: DockviewComponentProps) => (
-              <div
-                style={{
-                  height: "100%", 
-                  overflow: "auto",
-                }}
-              >
-                <MarketWatch {...props} />
-              </div>
-            ),
-          }}
-          rightHeaderActionsComponent={DockviewHeaderControls}
-        />
-
+        onReady={onReady}
+        className={dockviewTheme}
+        components={{
+          watchlist: (props: DockviewComponentProps) => (
+            <div style={{ height: "100%", overflow: "auto" }}>
+              <Watchlist {...props} />
+            </div>
+          ),
+          terminal: (props: DockviewComponentProps) => (
+            <div style={{ height: "100%", overflow: "auto" }}>
+              <Terminal {...props} />
+            </div>
+          ),
+          marketdepth: (props: DockviewComponentProps) => (
+            <div style={{ height: "100%", overflow: "auto" }}>
+              <MarketDepth {...props} />
+            </div>
+          ),
+          marketwatch: (props: DockviewComponentProps) => (
+            <div style={{ height: "100%", overflow: "auto" }}>
+              <MarketWatch {...props} />
+            </div>
+          ),
+          portfolio: (props: DockviewComponentProps) => (
+            <div style={{ height: "100%", overflow: "auto" }}>
+              {clientCode ? (
+                <Portfolio {...props} clientCode={clientCode} />
+              ) : (
+                <div className="p-3 text-muted">No client selected</div>
+              )}
+            </div>
+          ),
+        }}
+        rightHeaderActionsComponent={DockviewHeaderControls}
+      />
     </div>
   );
 };
