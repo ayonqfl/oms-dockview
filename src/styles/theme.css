@@ -892,7 +892,7 @@
   background-color: #f8d7da;
 }
 
-.bid-bg{
+/* .bid-bg{
   background-color: rgb(9, 68, 54);
   color: #ffffff;
 }
@@ -900,4 +900,100 @@
 .ask-bg{
   background-color: rgb(100, 18, 43);
    color: #ffffff;
+} */
+
+.bid-bg {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+.ask-bg {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+ 
+/* Winbox custom styles */
+.winbox {
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.wb-header {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  color: white;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.wb-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.wb-body {
+  background: #f8fafc;
+  color: #1e293b;
+  padding: 0;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Dark theme support */
+.dark .wb-body {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+
+/* Winbox Modal Styles */
+/* Enhanced Winbox Styles */
+#winbox-portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.winbox {
+  z-index: 10000 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.wb-header {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8) !important;
+  color: white !important;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important; 
+}
+
+.wb-title {
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+.wb-body {
+  background: #f8fafc !important;
+  color: #1e293b !important;
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+  padding: 0 !important;
+}
+
+/* Dark theme support */
+.dark .wb-body {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* Custom control buttons */
+.wb-custom {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.wb-custom:hover {
+  opacity: 1;
 }

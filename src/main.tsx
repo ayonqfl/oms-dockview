@@ -4,6 +4,7 @@ import { StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import store from './store/index';  
 import App from './App';
+import { WinboxProvider } from './hooks/WinboxContext';
 
 import '../node_modules/ag-grid-community/styles/ag-theme-alpine.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -20,7 +21,9 @@ root.render(
   <StrictMode>
     <Provider store={store}>
       <ThemeProvider>
-        <App />
+         <WinboxProvider>
+           <App />
+          </WinboxProvider>
       </ThemeProvider>
     </Provider>
   </StrictMode>,

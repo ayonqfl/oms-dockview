@@ -1,33 +1,13 @@
-import React, { useMemo, useRef, useEffect, useCallback } from "react";
+import React, { useMemo, useRef, useEffect, useCallback ,useState} from "react";
 import { useSelector } from "react-redux";
 import { AgGridReact } from "ag-grid-react";
-import { ColDef, GridApi, ColumnApi, GridReadyEvent } from "ag-grid-community";
-import { useTheme } from "../../utilities/context/ThemeContext";
+import { ColDef, GridApi, ColumnApi, GridReadyEvent, RowClickedEvent } from "ag-grid-community";
 
-interface SymbolItem {
-  symbol: string;
-  company_name: string;
-  sector?: string;
-  category?: string;
-  coup_rate?: number;
-  yield?: number;
-  ltp: number;
-  close: number;
-  ycp?: number;
-  volume: number;
-  change: number;
-  change_per: number;
-  bid?: number;
-  bidqty?: number;
-  ask?: number;
-  askqty?: number;
-  trades?: number;
-  turnover?: number;
-  open?: number;
-  high?: number;
-  low?: number;
-  last_vol: number;
-}
+import { useTheme } from "../../utilities/context/ThemeContext";
+import { useWinbox } from "../../hooks/WinboxContext";
+import { SymbolItem } from "../../types/marketwatch";
+import { SymbolDetailsContent } from "../winboxPage/SymbolDetailsContent";
+ 
 
 // ✅ Stable formatters defined outside component
 const formatNumber = (params: any) => {
@@ -78,6 +58,12 @@ const MarketWatch: React.FC = () => {
   const isUserInteractingRef = useRef(false);
   const updateThrottleRef = useRef<NodeJS.Timeout | null>(null);
   const prevSymbolsRef = useRef<Record<string, SymbolItem>>({});
+  const { openWinbox, updateWinboxContent, closeWinbox } = useWinbox();
+
+  // ✅ Track open symbol details
+  const [openSymbolWinboxId, setOpenSymbolWinboxId] = useState<string | null>(null);
+
+
 
   // ✅ Get symbols from Redux with optimized selector
   const symbols: Record<string, SymbolItem> = useSelector(
@@ -393,31 +379,90 @@ const MarketWatch: React.FC = () => {
     enableCellChangeFlash: false,
   }), []);
 
+     // ✅ Handle row click - optimized with useCallback
+// ✅ Handle row click - optimized with useCallback
+  const onRowClicked = useCallback((event: RowClickedEvent) => {
+    const symbolData = event.data as SymbolItem;
+    const winboxId = `symbol-${symbolData.symbol}`;
+
+    // Create the content component
+    const content = <SymbolDetailsContent symbolData={symbolData} />;
+
+    openWinbox({
+      title: `${symbolData.symbol} - ${symbolData.company_name}`,
+      content,
+      width: 700,
+      height: 500,
+      id: winboxId,
+      icon: 'https://cdn-icons-png.flaticon.com/512/1006/1006770.png', // Stock icon
+      theme: theme === 'dark' ? 'modern' : 'white',
+      noMin: false,
+      noMax: false,
+      noFull: false,
+      noClose: false,
+      customControls: [{
+        class: 'wb-chart',
+        image: 'data:image/svg+xml;base64,PHN2Zy xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13v7h18v-1.5l-9-7L3 13zm0-6l9-7 9 7v1.5l-9-7-9 7V7z"/></svg>',
+        click: () => {
+          // Open chart view
+          console.log('Open chart for:', symbolData.symbol);
+        }
+      }]
+    });
+  }, [openWinbox, theme]);
+
+  // ✅ Update winbox content when symbol data changes
+  useEffect(() => {
+    const symbolWinboxIds = Array.from({ length: Object.keys(symbols).length }, (_, i) => `symbol-${Object.keys(symbols)[i]}`);
+    
+    symbolWinboxIds.forEach(winboxId => {
+      const symbol = winboxId.replace('symbol-', '');
+      const currentSymbolData = symbols[symbol];
+
+      if (currentSymbolData) {
+        const updatedContent = <SymbolDetailsContent symbolData={currentSymbolData} />;
+        updateWinboxContent(updatedContent, winboxId);
+      }
+    });
+  }, [symbols, updateWinboxContent]);
+
+  // ✅ Clean up when component unmounts
+  useEffect(() => {
+    return () => {
+      // Close all symbol winboxes when component unmounts
+      Object.keys(symbols).forEach(symbol => {
+        closeWinbox(`symbol-${symbol}`);
+      });
+    };
+  }, [symbols, closeWinbox]);
+
   return (
     <div
       className={theme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine"}
       style={{ height: "800px", width: "100%" }}
     >
       <AgGridReact
-        rowData={Object.values(symbols)}
-        getRowId={(params) => params.data.symbol}
-        headerHeight={32}
-        rowHeight={30}
-        deltaRowDataMode={true}
-        immutableData={true}
-        animateRows={false}
-        columnDefs={columnDefs}
-        defaultColDef={defaultColDef}
-        onGridReady={onGridReady}
-        onColumnResized={onColumnResized}
-        onColumnMoved={onColumnMoved}
-        onSortChanged={onSortChanged}
-        suppressRowClickSelection={true}
-        suppressCellSelection={true}
-        enableRangeSelection={false}
-        suppressMenuHide={true}
-        suppressLoadingOverlay={true}
-        suppressNoRowsOverlay={true}
+          rowData={Object.values(symbols)}
+          getRowId={(params) => params.data.symbol}
+         headerHeight={32}
+          rowHeight={30}
+          deltaRowDataMode={true}
+          immutableData={true}
+          animateRows={false}
+          columnDefs={columnDefs}
+          defaultColDef={defaultColDef}
+          onGridReady={onGridReady}
+          onRowClicked={onRowClicked}
+          onColumnResized={onColumnResized}
+          onColumnMoved={onColumnMoved}
+          onSortChanged={onSortChanged}
+          suppressRowClickSelection={false}
+          rowSelection="multiple"
+          suppressCellSelection={true}
+          enableRangeSelection={false}
+          suppressMenuHide={true}
+          suppressLoadingOverlay={true}
+          suppressNoRowsOverlay={true}
       />
     </div>
   );
