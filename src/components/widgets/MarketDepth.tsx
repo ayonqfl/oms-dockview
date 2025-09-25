@@ -88,8 +88,6 @@ const displayData = useMemo(() => {
     const bid = bids[i];
     const ask = asks[i];
 
-    console.log("Bid:", bid, "Ask:", ask);
-
     cumBidQ += bid ? Number(bid.qty) : 0;
     cumAskQ += ask ? Number(ask.qty) : 0;
 
@@ -113,8 +111,6 @@ const displayData = useMemo(() => {
     if (!symbols || !selectedSymbol) return [];
 
     const symbolInfo = symbols[selectedSymbol];
-
-    console.log("InfoData symbolInfo:", symbolInfo);
     
     if (!symbolInfo) return [];
 

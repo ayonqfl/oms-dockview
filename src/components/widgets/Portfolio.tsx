@@ -390,11 +390,6 @@ function Portfolio({ clientCode }: PortfolioProps) {
     };
   }, []);
 
-  // ✅ Performance monitoring (remove in production)
-  useEffect(() => {
-    console.log('Portfolio component rendered');
-  });
-
   return (
     <div className="portfolio">
       <div className="d-flex justify-content-between align-items-center mb-3">

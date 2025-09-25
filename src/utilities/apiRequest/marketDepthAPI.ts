@@ -10,7 +10,6 @@ export interface MarketDepthAPIParams {
 export const fetchMarketDepthData = async (
   params: MarketDepthAPIParams
 ): Promise<MarketDepthResponse> => {
-  console.log("Fetching market depth data with params:", params);
 
   try {
     // Split symbol into symbol and board (e.g., "ACI.PUBLIC" → "ACI", "PUBLIC")
@@ -21,8 +20,6 @@ export const fetchMarketDepthData = async (
       symbol: mktSymbol,
       board: mktGroup,
     });
-
-    console.log("Market depth data fetched:", response.data);
 
     return response.data as MarketDepthResponse;
   } catch (error) {

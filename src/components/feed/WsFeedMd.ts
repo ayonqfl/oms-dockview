@@ -30,8 +30,7 @@ const WsFeedMd: React.FC = () => {
 
       // Dispatch directly without batching
       switch (channel) {
-        case "ltp":
-          console.log("LTP message received:", msg);
+        case "ltp": 
           dispatch(updateLtp(msg));
           break;
         case "bbo":

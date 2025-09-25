@@ -114,7 +114,6 @@ onmessage = (e: MessageEvent) => {
 
   switch (msg_type) {
     case "init":
-      console.log("Worker initialized");
       connectToSocket();
       break;
 
