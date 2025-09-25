@@ -4,6 +4,7 @@ import symbolsReducer from "../slices/symbolsSlicer";
 import timeAndSalesReducer from "../slices/timeAndSalesSlicer";
 import indexReducer from "../slices/indexSlicer";
 import globalMarketReducer from "../slices/GlobalMarketSlicer";
+import marketDepthReducer from "../slices/marketDepthSlice";  
 
 // ✅ Create the store
 const store = configureStore({
@@ -13,6 +14,7 @@ const store = configureStore({
     timesales: timeAndSalesReducer,
     indexes: indexReducer,
     mktHealth: globalMarketReducer,
+    marketDepth: marketDepthReducer,  
   },
 });
 

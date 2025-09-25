@@ -1,204 +1,235 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ModuleRegistry } from "ag-grid-community";
 import { AllCommunityModule } from "ag-grid-community";
 import { useTheme } from "../../utilities/context/ThemeContext";
+import { useMarketDepth } from "../../hooks/useMarketDepth";
+import { useSelector } from "react-redux";
 
 // ✅ Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
 
+interface SymbolItem {
+  ltp?: number;
+  open?: number;
+  trades?: number;
+  last_vol?: number;
+  high?: number;
+  close?: number;
+  change?: number;
+  change_per?: number;
+  category?: string;
+  ycp?: number;
+  turnover?: number;
+  volume?: number;
+  low?: number;
+  sector?: string;
+}
+
 const MarketDepth: React.FC = () => {
   const { theme } = useTheme();
+  const { filters, data, loading, error, updateFilters } = useMarketDepth();
 
-  // ✅ Column Definitions
+    // ✅ Get symbols from Redux
+  const symbols: Record<string, SymbolItem> = useSelector(
+    (state: any) => state.symbols.symbols || {}
+  );
+
+    // Selected symbol state
+  const [selectedSymbol, setSelectedSymbol] = useState<string>(filters.symbol);
+
+  // Update filters when symbol changes
+  const handleSymbolChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.toUpperCase();
+      setSelectedSymbol(value);
+      updateFilters({ symbol: value });
+    },
+    [updateFilters]
+  );
+
+  const handleExchangeChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      updateFilters({ exchange: e.target.value });
+    },
+    [updateFilters]
+  );
+
+  const handleSortByChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      updateFilters({ sortBy: e.target.value as "price" | "quantity" });
+    },
+    [updateFilters]
+  );
+ 
+  // ✅ Market depth table data
+const displayData = useMemo(() => {
+  if (!data || !data.data) return [];
+
+  const bids = data.data.bid_levels || [];
+  const asks = data.data.ask_levels || [];
+
+  const maxLen = Math.max(bids.length, asks.length);
+  const rows: {
+    ord: number | string;
+    cumQ: number | string;
+    bidQ: number | string;
+    bid: number | string;
+    ask: number | string;
+    askQ: number | string;
+    cumQ2: number | string;
+    ord2: number | string;
+  }[] = [];
+
+  let cumBidQ = 0;
+  let cumAskQ = 0;
+
+  for (let i = 0; i < maxLen; i++) {
+    const bid = bids[i];
+    const ask = asks[i];
+
+    console.log("Bid:", bid, "Ask:", ask);
+
+    cumBidQ += bid ? Number(bid.qty) : 0;
+    cumAskQ += ask ? Number(ask.qty) : 0;
+
+    rows.push({
+      ord: bid ? i + 1 : "",
+      cumQ: bid ? cumBidQ : "",
+      bidQ: bid ? bid.qty : "",
+      bid: bid ? Number(bid.price).toFixed(data.data.price_decimals) : "",
+      ask: ask ? Number(ask.price).toFixed(data.data.price_decimals) : "",
+      askQ: ask ? ask.qty : "",
+      cumQ2: ask ? cumAskQ : "",
+      ord2: ask ? i + 1 : "",
+    });
+  }
+
+  return rows;
+}, [data]);
+
+  // ✅ InfoData from Redux symbols
+  const infoData = useMemo(() => {
+    if (!symbols || !selectedSymbol) return [];
+
+    const symbolInfo = symbols[selectedSymbol];
+
+    console.log("InfoData symbolInfo:", symbolInfo);
+    
+    if (!symbolInfo) return [];
+
+    const cls = (val: number | undefined) => {
+      if (val === undefined) return "";
+      return val >= 0 ? "text-success" : "text-danger";
+    };
+
+    return [
+      ["Last", symbolInfo.ltp?.toString() ?? "", cls(symbolInfo.change)],
+      ["Open", symbolInfo.open?.toString() ?? "", ""],
+      ["Trade", symbolInfo.trades?.toLocaleString() ?? "", ""],
+      ["L.Vol", symbolInfo.last_vol?.toString() ?? "", ""],
+      ["SH", symbolInfo.high?.toString() ?? "", ""],
+      ["DH", symbolInfo.high?.toString() ?? "", ""],
+      ["CH", symbolInfo.close?.toString() ?? "", ""],
+      ["Net", symbolInfo.change?.toString() ?? "", cls(symbolInfo.change)],
+      ["D%", symbolInfo.change_per ? `${symbolInfo.change_per}%` : "", cls(symbolInfo.change_per)],
+      ["Ctg", symbolInfo.category ?? "", ""],
+      ["YCP", symbolInfo.ycp?.toString() ?? "", ""],
+      ["Close", symbolInfo.close?.toString() ?? "", ""],
+      ["Value", symbolInfo.turnover?.toLocaleString() ?? "", ""],
+      ["Vol", symbolInfo.volume?.toLocaleString() ?? "", ""],
+      ["SL", symbolInfo.low?.toString() ?? "", ""],
+      ["DL", symbolInfo.low?.toString() ?? "", ""],
+      ["CL", symbolInfo.close?.toString() ?? "", ""],
+      ["52Wk", "-", ""],
+      ["VWAP", "-", ""],
+      ["Mkt", symbolInfo.sector ?? "", ""],
+    ];
+  }, [symbols, selectedSymbol]);
+
+  // Column definitions
   const columnDefs = useMemo(
     () => [
-      { headerName: "Ordr", 
-        field: "ord", 
-        flex: 1, 
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#01392e", fontWeight: "bold", color: "white" }
-            : {background: "#035644", fontWeight: "bold", color: "white"},
-     },
-      { headerName: "CUM Q", 
-        field: "cumQ", 
-        flex: 1,
-         minWidth: 80,
-          cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#01392e", fontWeight: "bold", color: "white" }
-            : {background: "#035644", fontWeight: "bold", color: "white"},
-         },
-      { headerName: "BID Q", 
-        field: "bidQ", 
-        flex: 1, 
-        minWidth: 80 ,
-         cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#025242", fontWeight: "bold", color: "white" }
-            : {background: "#047b62", fontWeight: "bold", color: "white"},
-      },
-      {
-        headerName: "BID",
-        field: "bid",
-        flex: 1,
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#025242", fontWeight: "bold", color: "white" }
-            : {background: "#047b62", fontWeight: "bold", color: "white"},
-      },
-      {
-        headerName: "ASK",
-        field: "ask",
-        flex: 1,
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#7a1a34", fontWeight: "bold", color: "white" }
-            : {background: "#ab2449", fontWeight: "bold", color: "white"},
-      },
-      { headerName: "ASK Q", 
-        field: "askQ", 
-        flex: 1, 
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#7a1a34", fontWeight: "bold", color: "white" }
-            : {background: "#ab2449", fontWeight: "bold", color: "white"},
-     },
-      { headerName: "CUM Q", 
-        field: "cumQ2", 
-        flex: 1,
-         minWidth: 80,
-         cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#551224", fontWeight: "bold", color: "white" }
-            : {background: "#771933", fontWeight: "bold", color: "white"},
-         },
-      { headerName: "Ordr", 
-        field: "ord2", 
-        flex: 1, 
-        minWidth: 80,
-         cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#551224", fontWeight: "bold", color: "white" }
-            : {background: "#771933", fontWeight: "bold", color: "white"},
-    },
+      { headerName: "Ordr", field: "ord", flex: 1, minWidth: 80 },
+      { headerName: "CUM Q", field: "cumQ", flex: 1, minWidth: 80 },
+      { headerName: "BID Q", field: "bidQ", flex: 1, minWidth: 80 },
+      { headerName: "BID", field: "bid", flex: 1, minWidth: 80 },
+      { headerName: "ASK", field: "ask", flex: 1, minWidth: 80 },
+      { headerName: "ASK Q", field: "askQ", flex: 1, minWidth: 80 },
+      { headerName: "CUM Q", field: "cumQ2", flex: 1, minWidth: 80 },
+      { headerName: "Ordr", field: "ord2", flex: 1, minWidth: 80 },
     ],
     []
   );
 
-  // ✅ Row Data
-  const rowData = [
-    { ord: 1, cumQ: 5, bidQ: 5, bid: 190.3, ask: 190.4, askQ: 277, cumQ2: 277, ord2: 1 },
-    { ord: 2, cumQ: 53, bidQ: 48, bid: 190.2, ask: 192.5, askQ: 150, cumQ2: 427, ord2: 1 },
-    { ord: 3, cumQ: 233, bidQ: 180, bid: 190.1, ask: 192.6, askQ: 1, cumQ2: 428, ord2: 1 },
-    { ord: 7, cumQ: 521, bidQ: 288, bid: 190.0, ask: 193.0, askQ: 200, cumQ2: 628, ord2: 2 },
-    { ord: 7, cumQ: 643, bidQ: 122, bid: 189.9, ask: 193.1, askQ: 29, cumQ2: 657, ord2: 2 },
-    { ord: 5, cumQ: 713, bidQ: 70, bid: 189.8, ask: 193.7, askQ: 25, cumQ2: 662, ord2: 2 },
-    { ord: 1, cumQ: 723, bidQ: 10, bid: 189.7, ask: 193.8, askQ: 2995, cumQ2: 3657, ord2: 3 },
-    { ord: 3, cumQ: 853, bidQ: 130, bid: 189.6, ask: 194.0, askQ: 251, cumQ2: 3908, ord2: 3 },
-    { ord: 3, cumQ: 973, bidQ: 120, bid: 189.5, ask: 194.9, askQ: 500, cumQ2: 4408, ord2: 1 },
-    { ord: 1, cumQ: 978, bidQ: 5, bid: 189.4, ask: 195.0, askQ: 132, cumQ2: 4540, ord2: 5 },
-  ];
-
   return (
-    <div className="container-fluid text-light rounded py-2">
-      {/* Top Section */}
+     <div className="container-fluid text-light rounded py-2">
+      {/* Filters */}
       <div className="row g-2 mb-3">
         <div className="col-12 col-md-6 d-flex gap-2">
-          <select className="form-select form-select-sm bg-secondary text-light">
-            <option>DSE</option>
-            <option>CSE</option>
+          <select
+            className="form-select form-select-sm bg-secondary text-light"
+            value={filters.exchange}
+            onChange={handleExchangeChange}
+          >
+            <option value="DSE">DSE</option>
+            <option value="CSE">CSE</option>
           </select>
           <input
             type="text"
-            value="ACI.PUBLIC"
+            value={selectedSymbol}
+            onChange={handleSymbolChange}
             className="form-control form-control-sm bg-secondary text-light"
-            readOnly
+            placeholder="Enter symbol..."
           />
         </div>
 
         <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
-          <select className="form-select form-select-sm bg-secondary text-light">
-            <option>By Price</option>
-            <option>By Quantity</option>
+          <select
+            className="form-select form-select-sm bg-secondary text-light"
+            value={filters.sortBy === "price" ? "price" : "quantity"}
+            onChange={handleSortByChange}
+          >
+            <option value="price">By Price</option>
+            <option value="quantity">By Quantity</option>
           </select>
           <button className="btn btn-success btn-sm fw-bold">BUY</button>
           <button className="btn btn-danger btn-sm fw-bold">SELL</button>
         </div>
       </div>
 
-    
-    {/* Info Section */}
-    <div className="text-center small g-2 mb-3">
-    {(() => {
-        const infoData = [
-        ["Last", "190.4", "text-danger"],
-        ["Open", "193.8", ""],
-        ["Trade", "1,107", ""],
-        ["L.Vol", "10", ""],
-        ["SH", "213.0", ""],
-        ["DH", "193.8", ""],
-        ["CH", "209.40", ""],
-        ["Net", "-3.3", "text-danger"],
-        ["D%", "-1.7%", "text-danger"],
-        ["Ctg", "A", ""],
-        ["YCP", "193.7", ""],
-        ["Close", "190.7", ""],
-        ["Value", "190.7", ""],
-        ["Vol", "190.7", ""],
-        ["SL", "190.7", ""],
-        ["DL", "190.7", ""],
-        ["CL", "190.7", ""],
-        ["52Wk", "190.7", ""],
-        ["VWAP", "190.7", ""],
-        ["Mkt", "190.7", ""],
-        ];
-
-        const rows = [];
-        const itemsPerRow = 10;
-
-        for (let i = 0; i < infoData.length; i += itemsPerRow) {
-        const rowItems = infoData.slice(i, i + itemsPerRow);
-        rows.push(
-            <div className="row mt-2" key={i}>
-                {rowItems.map(([label, value, cls], idx) => (
-                    <div className="col-6 col-md-2 col-lg-1" key={idx}>
-                    <div>{label}</div>
-                    <div className={cls}>{value}</div>
-                    </div>
-                ))}
+      {/* Info Section */}
+      <div className="text-center small g-2 mb-3">
+        <div className="row mt-2">
+          {infoData.map(([label, value, cls], idx) => (
+            <div className="col-6 col-md-2 col-lg-1" key={idx}>
+              <div>{label}</div>
+              <div className={cls}>{value}</div>
             </div>
-        );
-        }
-
-        return rows;
-    })()}
-    </div>
-
-
-      {/* Progress Bar */}
-      <div className="progress mb-3" style={{ height: "10px" }}>
-        <div className="progress-bar bg-success" role="progressbar" style={{ width: "50.00%" }}></div>
-        <div className="progress-bar bg-danger" role="progressbar" style={{ width: "50.00%" }}></div>
+          ))}
+        </div>
       </div>
+
+      {/* Loading/Error */}
+      {loading && <div className="text-center mb-3">Loading...</div>}
+      {error && <div className="alert alert-danger">{error}</div>}
 
       {/* Market Depth Table */}
       <div
-        className={theme === "dark" ? "ag-theme-alpine-dark ag-container" : "ag-theme-alpine ag-container"}
+        className={
+          theme === "dark"
+            ? "ag-theme-alpine-dark ag-container"
+            : "ag-theme-alpine ag-container"
+        }
         style={{ width: "100%", overflow: "hidden" }}
       >
         <AgGridReact
           columnDefs={columnDefs}
-          rowData={rowData}
+          rowData={displayData}
           headerHeight={32}
           rowHeight={30}
-          domLayout="autoHeight"   
-          suppressHorizontalScroll= {true}  
+          domLayout="autoHeight"
+          suppressHorizontalScroll={true}
         />
       </div>
     </div>

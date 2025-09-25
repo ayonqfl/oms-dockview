@@ -16,9 +16,7 @@ function Dashboard(): JSX.Element {
 
   // 🔹 Get All Symbols
   const getAllSymbols = () => {
-    adminServer
-      .get(ALL_SYMBOL + "?exchange=DSE")
-      .then((response) => {
+    adminServer.get(ALL_SYMBOL + "?exchange=DSE").then((response) => {
         let new_array: Record<string, any> = {};
 
         response.data.data.forEach((item: any) => {

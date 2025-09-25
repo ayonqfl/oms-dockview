@@ -108,7 +108,7 @@ const MarketWatch: React.FC = () => {
       });
     }
   );
-
+console.log("MarketWatch symbols count:", Object.keys(symbols));
   // ✅ Check user interaction
   const isUserInteracting = useCallback((): boolean => {
     if (isUserInteractingRef.current) return true;

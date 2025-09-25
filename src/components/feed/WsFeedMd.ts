@@ -31,11 +31,15 @@ const WsFeedMd: React.FC = () => {
       // Dispatch directly without batching
       switch (channel) {
         case "ltp":
+          console.log("LTP message received:", msg);
           dispatch(updateLtp(msg));
           break;
         case "bbo":
           dispatch(updateBBO(msg));
           break;
+        // case "dse_md_mktdepth_custom":
+          
+        //   break;
          
       }
     };

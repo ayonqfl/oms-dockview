@@ -40,6 +40,7 @@ let channel_and_fields: Record<string, ChannelConfig> = {
   adv_dcl: { fields: ["adv_dcl"], active: true },
   cse_adv_dcl: { fields: ["adv_dcl"], active: true },
   index_chart: { fields: ["index"], active: true },
+  dse_md_mktdepth_custom: { fields: ["symbol", "data"], active: true },
 //   cse_health: { fields: ["adv_dcl"], active: true },
 //   dse_health: { fields: ["index"], active: true },
 };
