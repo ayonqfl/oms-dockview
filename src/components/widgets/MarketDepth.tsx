@@ -1,4 +1,5 @@
-import React, { useMemo, useCallback, useState } from "react";
+// MarketDepth.tsx
+import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ModuleRegistry } from "ag-grid-community";
 import { AllCommunityModule } from "ag-grid-community";
@@ -26,17 +27,34 @@ interface SymbolItem {
   sector?: string;
 }
 
-const MarketDepth: React.FC = () => {
-  const { theme } = useTheme();
-  const { filters, data, loading, error, updateFilters } = useMarketDepth();
+interface MarketDepthProps {
+  id: string; // Unique identifier for this instance
+}
 
-    // ✅ Get symbols from Redux
+const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
+  const { theme } = useTheme();
+  const { 
+    instance, 
+    updateFilters, 
+    fetchData 
+  } = useMarketDepth(id);
+
+  // ✅ Get symbols from Redux
   const symbols: Record<string, SymbolItem> = useSelector(
     (state: any) => state.symbols.symbols || {}
   );
 
-    // Selected symbol state
-  const [selectedSymbol, setSelectedSymbol] = useState<string>(filters.symbol);
+  // Local symbol state
+  const [selectedSymbol, setSelectedSymbol] = useState<string>(
+    instance?.filters.symbol || "1JANATAMF.PUBLIC"
+  );
+
+  // Update local state when instance filters change
+  useEffect(() => {
+    if (instance?.filters.symbol) {
+      setSelectedSymbol(instance.filters.symbol);
+    }
+  }, [instance?.filters.symbol]);
 
   // Update filters when symbol changes
   const handleSymbolChange = useCallback(
@@ -61,50 +79,55 @@ const MarketDepth: React.FC = () => {
     },
     [updateFilters]
   );
+
+  // Manual refresh
+  const handleRefresh = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
  
   // ✅ Market depth table data
-const displayData = useMemo(() => {
-  if (!data || !data.data) return [];
+  const displayData = useMemo(() => {
+    if (!instance?.data || !instance.data.data) return [];
 
-  const bids = data.data.bid_levels || [];
-  const asks = data.data.ask_levels || [];
+    const bids = instance.data.data.bid_levels || [];
+    const asks = instance.data.data.ask_levels || [];
 
-  const maxLen = Math.max(bids.length, asks.length);
-  const rows: {
-    ord: number | string;
-    cumQ: number | string;
-    bidQ: number | string;
-    bid: number | string;
-    ask: number | string;
-    askQ: number | string;
-    cumQ2: number | string;
-    ord2: number | string;
-  }[] = [];
+    const maxLen = Math.max(bids.length, asks.length);
+    const rows: {
+      ord: number | string;
+      cumQ: number | string;
+      bidQ: number | string;
+      bid: number | string;
+      ask: number | string;
+      askQ: number | string;
+      cumQ2: number | string;
+      ord2: number | string;
+    }[] = [];
 
-  let cumBidQ = 0;
-  let cumAskQ = 0;
+    let cumBidQ = 0;
+    let cumAskQ = 0;
 
-  for (let i = 0; i < maxLen; i++) {
-    const bid = bids[i];
-    const ask = asks[i];
+    for (let i = 0; i < maxLen; i++) {
+      const bid = bids[i];
+      const ask = asks[i];
 
-    cumBidQ += bid ? Number(bid.qty) : 0;
-    cumAskQ += ask ? Number(ask.qty) : 0;
+      cumBidQ += bid ? Number(bid.qty) : 0;
+      cumAskQ += ask ? Number(ask.qty) : 0;
 
-    rows.push({
-      ord: bid ? i + 1 : "",
-      cumQ: bid ? cumBidQ : "",
-      bidQ: bid ? bid.qty : "",
-      bid: bid ? Number(bid.price).toFixed(data.data.price_decimals) : "",
-      ask: ask ? Number(ask.price).toFixed(data.data.price_decimals) : "",
-      askQ: ask ? ask.qty : "",
-      cumQ2: ask ? cumAskQ : "",
-      ord2: ask ? i + 1 : "",
-    });
-  }
+      rows.push({
+        ord: bid ? i + 1 : "",
+        cumQ: bid ? cumBidQ : "",
+        bidQ: bid ? bid.qty : "",
+        bid: bid ? Number(bid.price).toFixed(instance.data.data.price_decimals) : "",
+        ask: ask ? Number(ask.price).toFixed(instance.data.data.price_decimals) : "",
+        askQ: ask ? ask.qty : "",
+        cumQ2: ask ? cumAskQ : "",
+        ord2: ask ? i + 1 : "",
+      });
+    }
 
-  return rows;
-}, [data]);
+    return rows;
+  }, [instance?.data]);
 
   // ✅ InfoData from Redux symbols
   const infoData = useMemo(() => {
@@ -144,28 +167,106 @@ const displayData = useMemo(() => {
   }, [symbols, selectedSymbol]);
 
   // Column definitions
+  // ✅ Column Definitions
   const columnDefs = useMemo(
     () => [
-      { headerName: "Ordr", field: "ord", flex: 1, minWidth: 80 },
-      { headerName: "CUM Q", field: "cumQ", flex: 1, minWidth: 80 },
-      { headerName: "BID Q", field: "bidQ", flex: 1, minWidth: 80 },
-      { headerName: "BID", field: "bid", flex: 1, minWidth: 80 },
-      { headerName: "ASK", field: "ask", flex: 1, minWidth: 80 },
-      { headerName: "ASK Q", field: "askQ", flex: 1, minWidth: 80 },
-      { headerName: "CUM Q", field: "cumQ2", flex: 1, minWidth: 80 },
-      { headerName: "Ordr", field: "ord2", flex: 1, minWidth: 80 },
+      { headerName: "Ordr", 
+        field: "ord", 
+        flex: 1, 
+        minWidth: 80,
+        cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#01392e", fontWeight: "bold", color: "white" }
+            : {background: "#035644", fontWeight: "bold", color: "white"},
+     },
+      { headerName: "CUM Q", 
+        field: "cumQ", 
+        flex: 1,
+         minWidth: 80,
+          cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#01392e", fontWeight: "bold", color: "white" }
+            : {background: "#035644", fontWeight: "bold", color: "white"},
+         },
+      { headerName: "BID Q", 
+        field: "bidQ", 
+        flex: 1, 
+        minWidth: 80 ,
+         cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#025242", fontWeight: "bold", color: "white" }
+            : {background: "#047b62", fontWeight: "bold", color: "white"},
+      },
+      {
+        headerName: "BID",
+        field: "bid",
+        flex: 1,
+        minWidth: 80,
+        cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#025242", fontWeight: "bold", color: "white" }
+            : {background: "#047b62", fontWeight: "bold", color: "white"},
+      },
+      {
+        headerName: "ASK",
+        field: "ask",
+        flex: 1,
+        minWidth: 80,
+        cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#7a1a34", fontWeight: "bold", color: "white" }
+            : {background: "#ab2449", fontWeight: "bold", color: "white"},
+      },
+      { headerName: "ASK Q", 
+        field: "askQ", 
+        flex: 1, 
+        minWidth: 80,
+        cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#7a1a34", fontWeight: "bold", color: "white" }
+            : {background: "#ab2449", fontWeight: "bold", color: "white"},
+     },
+      { headerName: "CUM Q", 
+        field: "cumQ2", 
+        flex: 1,
+         minWidth: 80,
+         cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#551224", fontWeight: "bold", color: "white" }
+            : {background: "#771933", fontWeight: "bold", color: "white"},
+         },
+      { headerName: "Ordr", 
+        field: "ord2", 
+        flex: 1, 
+        minWidth: 80,
+         cellStyle: (params: any) =>
+          params.node.rowIndex % 2 !== 0
+            ? { background: "#551224", fontWeight: "bold", color: "white" }
+            : {background: "#771933", fontWeight: "bold", color: "white"},
+    },
     ],
     []
   );
 
+  if (!instance) {
+    return <div className="text-center p-3">Loading Market Depth...</div>;
+  }
+
   return (
      <div className="container-fluid text-light rounded py-2">
+      {/* Instance Info */}
+      <div className="row mb-2">
+        <div className="col-12">
+          <small className="text-muted">Market Depth: {instance.filters.symbol}</small>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="row g-2 mb-3">
         <div className="col-12 col-md-6 d-flex gap-2">
           <select
             className="form-select form-select-sm bg-secondary text-light"
-            value={filters.exchange}
+            value={instance.filters.exchange}
             onChange={handleExchangeChange}
           >
             <option value="DSE">DSE</option>
@@ -178,12 +279,19 @@ const displayData = useMemo(() => {
             className="form-control form-control-sm bg-secondary text-light"
             placeholder="Enter symbol..."
           />
+          {/* <button 
+            className="btn btn-info btn-sm fw-bold"
+            onClick={handleRefresh}
+            disabled={instance.loading}
+          >
+            {instance.loading ? "..." : "Refresh"}
+          </button> */}
         </div>
 
         <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
           <select
             className="form-select form-select-sm bg-secondary text-light"
-            value={filters.sortBy === "price" ? "price" : "quantity"}
+            value={instance.filters.sortBy}
             onChange={handleSortByChange}
           >
             <option value="price">By Price</option>
@@ -207,27 +315,29 @@ const displayData = useMemo(() => {
       </div>
 
       {/* Loading/Error */}
-      {loading && <div className="text-center mb-3">Loading...</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
+      {instance.loading && <div className="text-center mb-3">Loading market data...</div>}
+      {instance.error && <div className="alert alert-danger">{instance.error}</div>}
 
       {/* Market Depth Table */}
-      <div
-        className={
-          theme === "dark"
-            ? "ag-theme-alpine-dark ag-container"
-            : "ag-theme-alpine ag-container"
-        }
-        style={{ width: "100%", overflow: "hidden" }}
-      >
-        <AgGridReact
-          columnDefs={columnDefs}
-          rowData={displayData}
-          headerHeight={32}
-          rowHeight={30}
-          domLayout="autoHeight"
-          suppressHorizontalScroll={true}
-        />
-      </div>
+      {instance.data && (
+        <div
+          className={
+            theme === "dark"
+              ? "ag-theme-alpine-dark ag-container"
+              : "ag-theme-alpine ag-container"
+          }
+          style={{ width: "100%", overflow: "hidden" }}
+        >
+          <AgGridReact
+            columnDefs={columnDefs}
+            rowData={displayData}
+            headerHeight={32}
+            rowHeight={30}
+            domLayout="autoHeight"
+            suppressHorizontalScroll={true}
+          />
+        </div>
+      )}
     </div>
   );
 };

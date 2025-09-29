@@ -181,7 +181,7 @@ const TradeView = (): JSX.Element => {
   const dockviewTheme =
     theme === "dark" ? "dockview-theme-dark" : "dockview-theme-light";
 
-  return (
+    return (
     <div
       style={{ height: "899px", marginTop: "80px", marginLeft: "50px" }}
       data-theme={theme}
@@ -202,7 +202,8 @@ const TradeView = (): JSX.Element => {
           ),
           marketdepth: (props: DockviewComponentProps) => (
             <div style={{ height: "100%", overflow: "auto" }}>
-              <MarketDepth {...props} />
+              {/* Pass the panel ID as instance ID */}
+              <MarketDepth id={props.params.id || `marketdepth-${Date.now()}`} />
             </div>
           ),
           marketwatch: (props: DockviewComponentProps) => (

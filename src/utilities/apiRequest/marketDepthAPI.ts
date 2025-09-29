@@ -1,3 +1,4 @@
+// marketDepthAPI.ts
 import adminServer from "../../utilities/server/serverAdmin";
 import { MarketDepthResponse } from "../../slices/marketDepthSlice";
 
@@ -10,9 +11,7 @@ export interface MarketDepthAPIParams {
 export const fetchMarketDepthData = async (
   params: MarketDepthAPIParams
 ): Promise<MarketDepthResponse> => {
-
   try {
-    // Split symbol into symbol and board (e.g., "ACI.PUBLIC" → "ACI", "PUBLIC")
     const [mktSymbol, mktGroup] = params.symbol.split(".");
 
     const response = await adminServer.post("/market-data/depth", {
