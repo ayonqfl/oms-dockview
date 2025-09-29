@@ -6,6 +6,7 @@ import { AllCommunityModule } from "ag-grid-community";
 import { useTheme } from "../../utilities/context/ThemeContext";
 import { useMarketDepth } from "../../hooks/useMarketDepth";
 import { useSelector } from "react-redux";
+import AutoComplete from "../common/AutoComplete";
 
 // ✅ Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -28,7 +29,7 @@ interface SymbolItem {
 }
 
 interface MarketDepthProps {
-  id: string; // Unique identifier for this instance
+  id: string;
 }
 
 const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
@@ -39,32 +40,61 @@ const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
     fetchData 
   } = useMarketDepth(id);
 
-  // ✅ Get symbols from Redux
   const symbols: Record<string, SymbolItem> = useSelector(
     (state: any) => state.symbols.symbols || {}
   );
 
-  // Local symbol state
   const [selectedSymbol, setSelectedSymbol] = useState<string>(
     instance?.filters.symbol || "1JANATAMF.PUBLIC"
   );
 
-  // Update local state when instance filters change
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     if (instance?.filters.symbol) {
       setSelectedSymbol(instance.filters.symbol);
     }
   }, [instance?.filters.symbol]);
 
-  // Update filters when symbol changes
-  const handleSymbolChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value.toUpperCase();
-      setSelectedSymbol(value);
+  const allSymbols = useMemo(() => {
+    return Object.keys(symbols || {})
+      .filter(symbol => symbol.includes('.')) // Only symbols with board
+      .sort();
+  }, [symbols]);
+
+  const searchSymbols = useCallback((query: string) => {
+    if (query.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const filtered = allSymbols.filter(symbol =>
+      symbol.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    // Sort by relevance (exact match first, then partial matches)
+    const sorted = filtered.sort((a, b) => {
+      const aStartsWith = a.toLowerCase().startsWith(query.toLowerCase());
+      const bStartsWith = b.toLowerCase().startsWith(query.toLowerCase());
+      
+      if (aStartsWith && !bStartsWith) return -1;
+      if (!aStartsWith && bStartsWith) return 1;
+      return a.localeCompare(b);
+    });
+    
+    setSuggestions(sorted.slice(0, 20)); // Increased to 20 for better UX
+  }, [allSymbols]);
+
+  const handleSymbolChange = useCallback((value: string) => {
+    setSelectedSymbol(value);
+    setSearchQuery(value);
+    
+    // Only update filters if it's a complete symbol (contains dot)
+    if (value.includes('.')) {
       updateFilters({ symbol: value });
-    },
-    [updateFilters]
-  );
+    }
+  }, [updateFilters]);
 
   const handleExchangeChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -80,12 +110,11 @@ const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
     [updateFilters]
   );
 
-  // Manual refresh
   const handleRefresh = useCallback(() => {
     fetchData();
   }, [fetchData]);
- 
-  // ✅ Market depth table data
+
+  // Market depth table data (keep your existing implementation)
   const displayData = useMemo(() => {
     if (!instance?.data || !instance.data.data) return [];
 
@@ -93,16 +122,7 @@ const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
     const asks = instance.data.data.ask_levels || [];
 
     const maxLen = Math.max(bids.length, asks.length);
-    const rows: {
-      ord: number | string;
-      cumQ: number | string;
-      bidQ: number | string;
-      bid: number | string;
-      ask: number | string;
-      askQ: number | string;
-      cumQ2: number | string;
-      ord2: number | string;
-    }[] = [];
+    const rows: any[] = [];
 
     let cumBidQ = 0;
     let cumAskQ = 0;
@@ -129,12 +149,11 @@ const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
     return rows;
   }, [instance?.data]);
 
-  // ✅ InfoData from Redux symbols
+  // InfoData from Redux symbols (keep your existing implementation)
   const infoData = useMemo(() => {
     if (!symbols || !selectedSymbol) return [];
 
     const symbolInfo = symbols[selectedSymbol];
-    
     if (!symbolInfo) return [];
 
     const cls = (val: number | undefined) => {
@@ -166,157 +185,112 @@ const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
     ];
   }, [symbols, selectedSymbol]);
 
-  // Column definitions
-  // ✅ Column Definitions
-  const columnDefs = useMemo(
-    () => [
-      { headerName: "Ordr", 
-        field: "ord", 
-        flex: 1, 
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#01392e", fontWeight: "bold", color: "white" }
-            : {background: "#035644", fontWeight: "bold", color: "white"},
-     },
-      { headerName: "CUM Q", 
-        field: "cumQ", 
-        flex: 1,
-         minWidth: 80,
-          cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#01392e", fontWeight: "bold", color: "white" }
-            : {background: "#035644", fontWeight: "bold", color: "white"},
-         },
-      { headerName: "BID Q", 
-        field: "bidQ", 
-        flex: 1, 
-        minWidth: 80 ,
-         cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#025242", fontWeight: "bold", color: "white" }
-            : {background: "#047b62", fontWeight: "bold", color: "white"},
-      },
-      {
-        headerName: "BID",
-        field: "bid",
-        flex: 1,
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#025242", fontWeight: "bold", color: "white" }
-            : {background: "#047b62", fontWeight: "bold", color: "white"},
-      },
-      {
-        headerName: "ASK",
-        field: "ask",
-        flex: 1,
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#7a1a34", fontWeight: "bold", color: "white" }
-            : {background: "#ab2449", fontWeight: "bold", color: "white"},
-      },
-      { headerName: "ASK Q", 
-        field: "askQ", 
-        flex: 1, 
-        minWidth: 80,
-        cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#7a1a34", fontWeight: "bold", color: "white" }
-            : {background: "#ab2449", fontWeight: "bold", color: "white"},
-     },
-      { headerName: "CUM Q", 
-        field: "cumQ2", 
-        flex: 1,
-         minWidth: 80,
-         cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#551224", fontWeight: "bold", color: "white" }
-            : {background: "#771933", fontWeight: "bold", color: "white"},
-         },
-      { headerName: "Ordr", 
-        field: "ord2", 
-        flex: 1, 
-        minWidth: 80,
-         cellStyle: (params: any) =>
-          params.node.rowIndex % 2 !== 0
-            ? { background: "#551224", fontWeight: "bold", color: "white" }
-            : {background: "#771933", fontWeight: "bold", color: "white"},
-    },
-    ],
-    []
-  );
+  // Column definitions (keep your existing implementation)
+  const columnDefs = useMemo(() => [
+    { headerName: "Ordr", field: "ord", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#01392e", fontWeight: "bold", color: "white" } : {background: "#035644", fontWeight: "bold", color: "white"} },
+    { headerName: "CUM Q", field: "cumQ", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#01392e", fontWeight: "bold", color: "white" } : {background: "#035644", fontWeight: "bold", color: "white"} },
+    { headerName: "BID Q", field: "bidQ", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#025242", fontWeight: "bold", color: "white" } : {background: "#047b62", fontWeight: "bold", color: "white"} },
+    { headerName: "BID", field: "bid", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#025242", fontWeight: "bold", color: "white" } : {background: "#047b62", fontWeight: "bold", color: "white"} },
+    { headerName: "ASK", field: "ask", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#7a1a34", fontWeight: "bold", color: "white" } : {background: "#ab2449", fontWeight: "bold", color: "white"} },
+    { headerName: "ASK Q", field: "askQ", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#7a1a34", fontWeight: "bold", color: "white" } : {background: "#ab2449", fontWeight: "bold", color: "white"} },
+    { headerName: "CUM Q", field: "cumQ2", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#551224", fontWeight: "bold", color: "white" } : {background: "#771933", fontWeight: "bold", color: "white"} },
+    { headerName: "Ordr", field: "ord2", flex: 1, minWidth: 80, cellStyle: (params: any) => params.node.rowIndex % 2 !== 0 ? { background: "#551224", fontWeight: "bold", color: "white" } : {background: "#771933", fontWeight: "bold", color: "white"} },
+  ], []);
 
   if (!instance) {
     return <div className="text-center p-3">Loading Market Depth...</div>;
   }
 
   return (
-     <div className="container-fluid text-light rounded py-2">
-      {/* Instance Info */}
-      <div className="row mb-2">
-        <div className="col-12">
-          <small className="text-muted">Market Depth: {instance.filters.symbol}</small>
-        </div>
-      </div>
+    <div className="container-fluid text-light rounded py-2">
 
       {/* Filters */}
-      <div className="row g-2 mb-3">
-        <div className="col-12 col-md-6 d-flex gap-2">
+      <div className="row g-3 mb-4">
+        <div className="col-12 col-md-6 d-flex gap-3 align-items-center">
           <select
-            className="form-select form-select-sm bg-secondary text-light"
+            className="form-select form-select-sm bg-dark text-light border-secondary"
             value={instance.filters.exchange}
             onChange={handleExchangeChange}
+            style={{ 
+              width: '120px',
+              borderRadius: '8px',
+              border: '1px solid #6c757d'
+            }}
           >
             <option value="DSE">DSE</option>
             <option value="CSE">CSE</option>
           </select>
-          <input
-            type="text"
-            value={selectedSymbol}
-            onChange={handleSymbolChange}
-            className="form-control form-control-sm bg-secondary text-light"
-            placeholder="Enter symbol..."
-          />
-          {/* <button 
-            className="btn btn-info btn-sm fw-bold"
-            onClick={handleRefresh}
-            disabled={instance.loading}
-          >
-            {instance.loading ? "..." : "Refresh"}
-          </button> */}
+          
+          <div className="flex-grow-1" style={{ maxWidth: '400px' }}>
+            <AutoComplete
+              value={searchQuery}
+              suggestions={suggestions}
+              completeMethod={searchSymbols}
+              onChange={handleSymbolChange}
+              placeholder="Search symbol (min 3 chars)..."
+              className="w-100"
+              minChars={3}
+            />
+          </div>
         </div>
 
         <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
           <select
-            className="form-select form-select-sm bg-secondary text-light"
+            className="form-select form-select-sm bg-dark text-light border-secondary"
             value={instance.filters.sortBy}
             onChange={handleSortByChange}
+            style={{ 
+              width: '140px',
+              borderRadius: '8px',
+              border: '1px solid #6c757d'
+            }}
           >
             <option value="price">By Price</option>
             <option value="quantity">By Quantity</option>
           </select>
-          <button className="btn btn-success btn-sm fw-bold">BUY</button>
-          <button className="btn btn-danger btn-sm fw-bold">SELL</button>
+          <button className="btn btn-success btn-sm fw-bold px-3">
+            <i className="fas fa-arrow-up me-1"></i>
+            BUY
+          </button>
+          <button className="btn btn-danger btn-sm fw-bold px-3">
+            <i className="fas fa-arrow-down me-1"></i>
+            SELL
+          </button>
         </div>
       </div>
 
       {/* Info Section */}
-      <div className="text-center small g-2 mb-3">
-        <div className="row mt-2">
-          {infoData.map(([label, value, cls], idx) => (
-            <div className="col-6 col-md-2 col-lg-1" key={idx}>
-              <div>{label}</div>
-              <div className={cls}>{value}</div>
+      <div className="row g-2 mb-4">
+        <div className="col-12">
+          <div className="bg-dark rounded p-3">
+            <div className="row g-3 text-center">
+              {infoData.map(([label, value, cls], idx) => (
+                <div className="col-6 col-md-3 col-lg-2 col-xl-1" key={idx}>
+                  <div className="small text-white mb-1">{label}</div>
+                  <div className={`fw-bold ${cls}`}>{value}</div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
-      {/* Loading/Error */}
-      {instance.loading && <div className="text-center mb-3">Loading market data...</div>}
-      {instance.error && <div className="alert alert-danger">{instance.error}</div>}
+      {/* Loading/Error States */}
+      {instance.loading && (
+        <div className="text-center mb-3 py-4">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <div className="mt-2 text-muted">Loading market data...</div>
+        </div>
+      )}
+      
+      {instance.error && (
+        <div className="alert alert-danger d-flex align-items-center" role="alert">
+          <i className="fas fa-exclamation-triangle me-2"></i>
+          {instance.error}
+        </div>
+      )}
 
       {/* Market Depth Table */}
       {instance.data && (
@@ -326,7 +300,11 @@ const MarketDepth: React.FC<MarketDepthProps> = ({ id }) => {
               ? "ag-theme-alpine-dark ag-container"
               : "ag-theme-alpine ag-container"
           }
-          style={{ width: "100%", overflow: "hidden" }}
+          style={{ 
+            width: "100%", 
+            overflow: "hidden",
+            borderRadius: '8px'
+          }}
         >
           <AgGridReact
             columnDefs={columnDefs}
