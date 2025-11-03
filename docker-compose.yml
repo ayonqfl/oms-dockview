@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  oms-dockview:
+    build: .
+    container_name: oms-dockview
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true   # ensures hot reload works on Windows/Mac
+    command: npm run dev -- --host
+    
