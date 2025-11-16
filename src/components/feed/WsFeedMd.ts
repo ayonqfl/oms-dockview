@@ -43,8 +43,17 @@ const WsFeedMd: React.FC = () => {
       }
     };
 
-    workerRef.current.postMessage(["init"]);
+
     workerRef.current.onmessage = handleWorkerMessage;
+
+    // Pass token & base URL from React
+    workerRef.current.postMessage([
+      "init",
+      {
+        baseUrl: window.APP_CONFIG.SOCKET_URL_MD,
+        token: window.APP_CONFIG.S_TOKEN, // your token generation can stay in React now
+      },
+    ]);
 
     return () => {
       workerRef.current?.terminate();

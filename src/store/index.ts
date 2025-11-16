@@ -5,10 +5,12 @@ import timeAndSalesReducer from "../slices/timeAndSalesSlicer";
 import indexReducer from "../slices/indexSlicer";
 import globalMarketReducer from "../slices/GlobalMarketSlicer";
 import marketDepthReducer from "../slices/marketDepthSlice";  
+import configReducer from "../slices/configSlicer";
 
 // ✅ Create the store
 const store = configureStore({
   reducer: {
+    config: configReducer,
     user: userReducer,
     symbols: symbolsReducer,
     timesales: timeAndSalesReducer,

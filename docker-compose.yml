@@ -9,6 +9,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules        # Prevent node_modules from being overwritten
+      # - ./config/config.js:/public/config.js #by default in public/config.js
     environment:
       - CHOKIDAR_USEPOLLING=true
     command: npm run dev -- --host

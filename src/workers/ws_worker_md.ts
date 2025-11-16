@@ -7,6 +7,10 @@ interface ChannelConfig {
   active: boolean;
 }
 
+let st_token = ""; // <-- Replace with your actual token
+let node_socket_md_host = ""; 
+let socket: Socket;
+
 // ✅ Generate daily token
 const generateToken = (): string => {
   const offset = 6; // UTC+6
@@ -14,12 +18,12 @@ const generateToken = (): string => {
   const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
   const localDate = new Date(utcDate.getTime() + offset * 3600000);
   const formattedDate = localDate.toISOString().split("T")[0]; // YYYY-MM-DD
-  const tokenString = "QUANT+" + formattedDate;
+  const tokenString = st_token + formattedDate;
   return MD5(tokenString).toString();
 };
 
-const token = generateToken();
-const node_socket_md_host = "https://ws-md.uftcl.com"; // <-- Replace with your actual host
+// const token = generateToken();
+// <-- Replace with your actual host
 
 let channel_and_fields: Record<string, ChannelConfig> = {
   bbo: { fields: ["bbo"], active: true },
@@ -47,33 +51,46 @@ let channel_and_fields: Record<string, ChannelConfig> = {
 
 let subscribed_channel: string[] = [];
 
-const socket: Socket = io(node_socket_md_host, {
-  autoConnect: false,
-  auth: { token },
-});
+// const socket: Socket = io(node_socket_md_host, {
+//   autoConnect: false,
+//   auth: { token },
+// });
 
 // -------------------- SOCKET CONNECTION --------------------
 function connectToSocket() {
-  if (socket.connected) {
+  if (!node_socket_md_host || !st_token) {
+    console.error("Worker not initialized with host/token");
+    return;
+  }
+
+  if (socket && socket.connected) {
     console.log("Socket already connected");
     return;
   }
+
+  const token = generateToken();
+
+  socket = io(node_socket_md_host, {
+    autoConnect: false,
+    auth: { token },
+  });
+
+  socket.on("connect", () => {
+    console.log("Connected to MD server " + node_socket_md_host);
+    subscribed_channel = [];
+    listen_active_channels();
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected from MD server " + node_socket_md_host);
+  });
+
+  socket.onAny((channel, msg) => {
+    sendDataToMainThread(channel, msg);
+  });
+
   socket.connect();
 }
-
-socket.on("connect", () => {
-  console.log("Connected to MD server " + node_socket_md_host);
-  subscribed_channel = [];
-  listen_active_channels();
-});
-
-socket.on("disconnect", () => {
-  console.log("Disconnected from MD server " + node_socket_md_host);
-});
-
-socket.onAny((channel, msg) => {
-  sendDataToMainThread(channel, msg);
-});
 
 // -------------------- CHANNEL HANDLING --------------------
 function activeInactiveChannel(channels: string | string[], status: boolean) {
@@ -114,6 +131,8 @@ onmessage = (e: MessageEvent) => {
 
   switch (msg_type) {
     case "init":
+      node_socket_md_host = args[0].baseUrl;
+      st_token = args[0].token;
       connectToSocket();
       break;
 

@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 
 // ✅ Create Axios instance
 const adminServer: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_SERVER_URL || "https://omsapi.quantbd.com/",
+  baseURL: window.APP_CONFIG.API_BASE_URL || "",
   headers: {
     Accept: "application/json",
   },
