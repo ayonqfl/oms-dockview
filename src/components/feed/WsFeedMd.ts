@@ -60,7 +60,7 @@ const WsFeedMd: React.FC = () => {
       workerRef.current = null;
       initializedRef.current = false;
     };
-  }, [dispatch]);
+  }, []);
 
   return null;
 };

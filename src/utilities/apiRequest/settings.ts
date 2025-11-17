@@ -1,0 +1,1 @@
+export const brokerConfiguration = "/common/broker-configuration" 

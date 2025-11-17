@@ -5,6 +5,7 @@ import CustomSidebar from "../components/common/CustomSidebar";
 import Topbar from "../components/common/Topbar";
 import WsFeedMd from "../components/feed/WsFeedMd";
 import "../styles/dashboard.css";
+import AppInitilizer from "../components/intializer/AppInitializer";
 
 interface DashboardLayoutContext {
   addPanelName: string | null;
@@ -27,7 +28,7 @@ const DashboardLayout = ({ isAuthenticated }: DashboardLayoutProps): JSX.Element
 
       <div className="d-flex flex-column flex-grow-1">
         <Topbar onAddLogs={handleAddLogs} />
-
+        { isAuthenticated && <AppInitilizer /> }
         {/* Only render WsFeedMd if user is authenticated */}
         {isAuthenticated && <WsFeedMd />}
 
