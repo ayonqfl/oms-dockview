@@ -6,6 +6,7 @@ import indexReducer from "../slices/indexSlicer";
 import globalMarketReducer from "../slices/GlobalMarketSlicer";
 import marketDepthReducer from "../slices/marketDepthSlice";  
 import configReducer from "../slices/configSlicer";
+import channelSlicer from "../slices/channelSlicer";
 
 // ✅ Create the store
 const store = configureStore({
@@ -17,6 +18,7 @@ const store = configureStore({
     indexes: indexReducer,
     mktHealth: globalMarketReducer,
     marketDepth: marketDepthReducer,  
+    channelSlicer: channelSlicer,
   },
 });
 

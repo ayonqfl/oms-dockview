@@ -5,6 +5,7 @@ import { login } from "../slices/userSlice";
 import { RootState, AppDispatch } from "../store/index";
 import adminServer, { setCookiesFromAuthResponse } from "../utilities/server/serverAdmin";
 import errorHandler from "../utilities/errorHandler/errorHandler";
+import { initializeChannels } from "../utilities/helpers/commonHelper";
 import { API_LOGIN } from "../utilities/apiRequest/auth";
 import logo from "../assets/broker-logo-light.png";
 
@@ -18,6 +19,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user);
+  const config = useSelector((state: RootState) => state.config);
 
   const [credentials, setCredential] = useState<Credentials>({
     username: "",
@@ -49,10 +51,19 @@ const Login: React.FC = () => {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       });
-
+      
+      if (res.data.hasOwnProperty('access_token')) {
       setCookiesFromAuthResponse(res.data);
       dispatch(login(res.data));
+      // set neccsary socket channel here 
+      initializeChannels( dispatch , config.data , res.data );
       navigate("/dashboard");
+      }
+      else {
+        alert(res.data.message)
+      }
+
+
     } catch (err) {
       errorHandler(err);
     } finally {
